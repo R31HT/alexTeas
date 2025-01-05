@@ -574,9 +574,9 @@ function Destroy(part)
 	spawn(function()
 
 
-		if game:GetService("ReplicatedStorage"):FindFirstChild("DespawnCar") then
+		if game:GetService("ReplicatedStorage").Events.DeleteVehicleEvent:FindFirstChild("DespawnCar") then
 			SupportedGame = true
-			game:GetService("ReplicatedStorage").DespawnCar:FireServer(part)
+			game:GetService("ReplicatedStorage").Events.DeleteVehicleEvent:FireServer(part)
 
 
 		elseif game:GetService("Players").LocalPlayer.Character:FindFirstChild("HandlessSegway") then
