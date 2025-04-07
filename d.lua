@@ -18,13 +18,13 @@ ScreenGui.Parent = localPlayer:WaitForChild("PlayerGui")
 local scaleX = isMobile and 1.1 or 1
 local scaleY = isMobile and 1.1 or 1
 local baseWidth = 300 * scaleX
-local baseHeight = 320 * scaleY -- Increased base height for better spacing
+local baseHeight = 360 * scaleY -- Increased base height to fit everything properly
 
 -- Main Frame with trollface theme
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, baseWidth, 0, baseHeight)
-MainFrame.Position = UDim2.new(0.5, -baseWidth/2, isMobile and 0.2 or 0.6, -baseHeight/2) -- Higher position on mobile
+MainFrame.Position = UDim2.new(0.5, -baseWidth/2, isMobile and 0.15 or 0.5, -baseHeight/2) -- Higher position on mobile
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -36,11 +36,20 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 8)
 UICorner.Parent = MainFrame
 
+-- Add trollface background image
+local TrollBackground = Instance.new("ImageLabel")
+TrollBackground.Size = UDim2.new(1, 0, 1, 0)
+TrollBackground.BackgroundTransparency = 1
+TrollBackground.Image = "rbxassetid://11797062053" -- Trollface asset ID
+TrollBackground.ImageTransparency = 0.9 -- Very faint background
+TrollBackground.ScaleType = Enum.ScaleType.Fit
+TrollBackground.Parent = MainFrame
+
 -- Title Bar
 local TitleBar = Instance.new("Frame")
 TitleBar.Name = "TitleBar"
 TitleBar.Size = UDim2.new(1, 0, 0, 35 * scaleY) -- Taller title bar for mobile
-TitleBar.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+TitleBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 TitleBar.BorderSizePixel = 0
 TitleBar.Parent = MainFrame
 
@@ -49,11 +58,20 @@ local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 8)
 TitleCorner.Parent = TitleBar
 
+-- Trollface icon for title
+local TitleIcon = Instance.new("ImageLabel")
+TitleIcon.Size = UDim2.new(0, 25 * scaleY, 0, 25 * scaleY)
+TitleIcon.Position = UDim2.new(0, 5 * scaleX, 0.5, -12.5 * scaleY)
+TitleIcon.BackgroundTransparency = 1
+TitleIcon.Image = "rbxassetid://11797062053" -- Trollface asset ID
+TitleIcon.Parent = TitleBar
+
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
-Title.Size = UDim2.new(1, 0, 1, 0)
+Title.Size = UDim2.new(1, -35 * scaleX, 1, 0)
+Title.Position = UDim2.new(0, 35 * scaleX, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "🤡 Message Bamboozler 🤡"
+Title.Text = "Message Bamboozler"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 18 * scaleY -- Larger text for mobile
 Title.Font = Enum.Font.GothamBold
@@ -163,9 +181,10 @@ UIListLayout.Padding = UDim.new(0, 2) -- Add spacing between items
 UIListLayout.Parent = DropdownList
 
 -- Fake Message Input (positioned below the dropdown list's maximum extent)
-local fakeInputY = 145 * scaleY
+-- Increased the position to avoid overlap when dropdown is open
+local fakeInputY = 170 * scaleY
 if isMobile then
-    fakeInputY = 155 * scaleY -- Move down a bit more on mobile to avoid overlap
+    fakeInputY = 175 * scaleY -- Move down more on mobile to avoid overlap
 end
 
 local FakeLabel = Instance.new("TextLabel")
@@ -208,9 +227,9 @@ ApplyButton.Size = UDim2.new(0, 140 * scaleX, 0, 42 * scaleY) -- Taller and wide
 ApplyButton.Position = UDim2.new(0.5, -70 * scaleX, 0, applyButtonY)
 ApplyButton.BackgroundColor3 = Color3.fromRGB(65, 180, 65)
 ApplyButton.BorderColor3 = Color3.fromRGB(40, 120, 40)
-ApplyButton.Text = "APPLY CHANGE"
+ApplyButton.Text = "BAMBOOZLE"
 ApplyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ApplyButton.TextSize = isMobile and 18 or 16 -- Larger text for mobile
+ApplyButton.TextSize = isMobile and 20 or 18 -- Larger text for mobile
 ApplyButton.Font = Enum.Font.GothamBold
 ApplyButton.Parent = MainFrame
 
@@ -229,8 +248,8 @@ PresetContainer.Position = UDim2.new(0, 15 * scaleX, 0, presetY)
 PresetContainer.BackgroundTransparency = 1
 PresetContainer.Parent = MainFrame
 
--- Status indicator - moved to the very bottom
-local statusY = presetY + 40 * scaleY
+-- Status indicator - moved to the very bottom with more space
+local statusY = baseHeight - 30 * scaleY
 
 local StatusDot = Instance.new("Frame")
 StatusDot.Name = "StatusDot"
@@ -250,25 +269,33 @@ StatusText.Name = "StatusText"
 StatusText.Size = UDim2.new(1, -35 * scaleX, 0, 22 * scaleY)
 StatusText.Position = UDim2.new(0, 30 * scaleX, 0, statusY - 6 * scaleY)
 StatusText.BackgroundTransparency = 1
-StatusText.Text = "Select a message to bamboozle"
+StatusText.Text = "Ready to troll"
 StatusText.TextColor3 = Color3.fromRGB(180, 180, 180)
 StatusText.TextSize = isMobile and 16 or 14 -- Larger text for mobile
 StatusText.TextXAlignment = Enum.TextXAlignment.Left
 StatusText.Font = Enum.Font.Gotham
 StatusText.Parent = MainFrame
 
--- Mini button to show GUI when hidden (made bigger for mobile)
+-- Mini button to show GUI when hidden (made bigger for mobile and trollface themed)
 local MiniButton = Instance.new("TextButton")
 MiniButton.Name = "MiniButton"
 MiniButton.Size = UDim2.new(0, isMobile and 50 or 40, 0, isMobile and 50 or 40) -- Much bigger for mobile
 MiniButton.Position = UDim2.new(0, 5, 0.1, 0) -- Better position for visibility
 MiniButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MiniButton.BorderSizePixel = 0
-MiniButton.Text = "🤡"
+MiniButton.Text = ""
 MiniButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 MiniButton.TextSize = isMobile and 28 or 22 -- Larger text for mobile
 MiniButton.Visible = false
 MiniButton.Parent = ScreenGui
+
+-- Add trollface icon to mini button
+local MiniIcon = Instance.new("ImageLabel")
+MiniIcon.Size = UDim2.new(0.8, 0, 0.8, 0)
+MiniIcon.Position = UDim2.new(0.1, 0, 0.1, 0)
+MiniIcon.BackgroundTransparency = 1
+MiniIcon.Image = "rbxassetid://11797062053" -- Trollface asset ID
+MiniIcon.Parent = MiniButton
 
 -- Add shadow and rounded corners to mini button
 local MiniCorner = Instance.new("UICorner")
@@ -281,6 +308,24 @@ local selectedMessageId = nil
 local selectedMessageIndex = nil
 local isDropdownOpen = false
 local processedMessages = {} -- Track message IDs we've already processed
+
+-- Funny troll status messages
+local trollStatusMessages = {
+    "Problem?",
+    "Epic troll time!",
+    "They'll never know...",
+    "Master bamboozler activated",
+    "Le trollface.jpg",
+    "Get rekt n00b",
+    "Time to troll!",
+    "Ultimate prankster mode",
+    "Bamboozle = Foolzled",
+    "We do a little trolling",
+    "You mad, bro?",
+    "Troll level: OVER 9000!",
+    "Stealth: 100",
+    "Chaos mode activated"
+}
 
 -- Mini Button Logic
 MiniButton.MouseButton1Click:Connect(function()
@@ -299,6 +344,12 @@ DropdownButton.MouseButton1Click:Connect(function()
     isDropdownOpen = not isDropdownOpen
     DropdownList.Visible = isDropdownOpen
     DropdownButton.Text = isDropdownOpen and "▲" or "▼" -- Change arrow direction
+    
+    -- Show a random troll message when opening dropdown
+    if isDropdownOpen then
+        local randomMessage = trollStatusMessages[math.random(1, #trollStatusMessages)]
+        StatusText.Text = randomMessage
+    end
 end)
 
 -- IMPROVED: Close dropdown only when clicking elsewhere in the GUI
@@ -349,7 +400,7 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
--- Message history tracker with duplicate prevention
+-- -- Message history tracker with duplicate prevention
 TextChatService.OnIncomingMessage = function(message)
     if message.TextSource and message.TextSource.UserId == localPlayer.UserId then
         -- Check if we've already processed this message ID
@@ -509,8 +560,21 @@ ApplyButton.MouseButton1Click:Connect(function()
     end)
 
     if success then
+        -- Select a random success message
+        local successMessages = {
+            "Epic troll success!",
+            "Bamboozled successfully!",
+            "Trololol! It worked!",
+            "They've been trolled!",
+            "Message changed: " .. fakeText,
+            "Le epic prank complete!",
+            "Trollface.jpg activated",
+            "Get rekt! Message changed"
+        }
+        local randomMsg = successMessages[math.random(1, #successMessages)]
+        
         StatusDot.BackgroundColor3 = Color3.fromRGB(65, 180, 65) -- Green for success
-        StatusText.Text = "Message changed to: " .. fakeText
+        StatusText.Text = randomMsg
 
         -- Update the message in our history
         if currentIndex and messageHistory[currentIndex] then
@@ -549,43 +613,115 @@ local function updateSizeBasedOnScreen()
     if viewportSize.X < 400 then
         -- For extremely narrow screens, make GUI even more compact
         MainFrame.Size = UDim2.new(0.95, 0, 0, baseHeight * scaleY)
-        MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset/2, 0.1, 0)
+        MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset/2, 0.2, 0)
     end
+    
+    -- Adjust component sizes based on current scale
+    MainFrame.Size = UDim2.new(0, baseWidth * scaleX, 0, baseHeight * scaleY)
+    if not (viewportSize.X < 400) then -- Skip this if we've already set position for narrow screens
+        MainFrame.Position = UDim2.new(0.5, -baseWidth/2 * scaleX, 0.3, 0)
+    end
+    
+    -- Update internal components
+    Title.Size = UDim2.new(1, 0, 0, 30 * scaleY)
+    Title.TextSize = 18 * scaleY
+    
+    CloseButton.Position = UDim2.new(1, -25 * scaleX, 0, 5 * scaleY)
+    CloseButton.Size = UDim2.new(0, 20 * scaleX, 0, 20 * scaleY)
+    
+    DropdownButton.Size = UDim2.new(0, 30 * scaleX, 0, 30 * scaleY)
+    DropdownButton.Position = UDim2.new(1, -35 * scaleX, 0, 45 * scaleY)
+    
+    SelectedMessage.Size = UDim2.new(1, -45 * scaleX, 0, 30 * scaleY)
+    SelectedMessage.Position = UDim2.new(0, 10 * scaleX, 0, 45 * scaleY)
+    
+    MessageInputLabel.Position = UDim2.new(0, 10 * scaleX, 0, 85 * scaleY)
+    FakeInput.Position = UDim2.new(0, 10 * scaleX, 0, 105 * scaleY)
+    FakeInput.Size = UDim2.new(1, -20 * scaleX, 0, 30 * scaleY)
+    
+    PresetLabel.Position = UDim2.new(0, 10 * scaleX, 0, 145 * scaleY)
+    PresetContainer.Position = UDim2.new(0, 10 * scaleX, 0, 165 * scaleY)
+    
+    StatusContainer.Position = UDim2.new(0, 10 * scaleX, 0, 210 * scaleY)
+    
+    ApplyButton.Position = UDim2.new(0.5, -50 * scaleX, 0, 240 * scaleY)
+    ApplyButton.Size = UDim2.new(0, 100 * scaleX, 0, 35 * scaleY)
+    
+    -- Update dropdown positioning
+    DropdownList.Position = UDim2.new(0, 10 * scaleX, 0, 80 * scaleY)
+    DropdownList.Size = UDim2.new(1, -20 * scaleX, 0, 150 * scaleY)
+    
+    -- Adjust preset buttons
+    for i, button in ipairs(PresetContainer:GetChildren()) do
+        if button:IsA("TextButton") then
+            button:Destroy() -- Remove existing buttons
+        end
+    end
+    
+    -- Recreate preset buttons with new sizing
+    createPresetButton("pick blue", 0)
+    createPresetButton("free robux", 1)
+    createPresetButton("i hacked", 2)
 end
 
--- Run the size adjustment when the script starts
+-- Add dragging ability to the frame
+local isDragging = false
+local dragInput
+local dragStart
+local startPos
+
+local function updateDrag(input)
+    local delta = input.Position - dragStart
+    local newPosition = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, 
+                                  startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    MainFrame.Position = newPosition
+end
+
+Title.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isDragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                isDragging = false
+            end
+        end)
+    end
+end)
+
+Title.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and isDragging then
+        updateDrag(input)
+    end
+end)
+
+-- Close button functionality
+CloseButton.MouseButton1Click:Connect(function()
+    MainGui:Destroy()
+end)
+
+-- Dropdown toggle
+DropdownButton.MouseButton1Click:Connect(function()
+    isDropdownOpen = not isDropdownOpen
+    DropdownList.Visible = isDropdownOpen
+    DropdownButton.Text = isDropdownOpen and "▲" or "▼"
+end)
+
+-- Initialize the GUI with appropriate sizing
 updateSizeBasedOnScreen()
 
--- Add slight animation for button presses
-local function addButtonEffect(button)
-    local originalColor = button.BackgroundColor3
-    local originalSize = button.Size
-    
-    button.MouseButton1Down:Connect(function()
-        button:TweenSize(
-            UDim2.new(originalSize.X.Scale, originalSize.X.Offset * 0.95, 
-                      originalSize.Y.Scale, originalSize.Y.Offset * 0.95),
-            Enum.EasingDirection.Out,
-            Enum.EasingStyle.Quad,
-            0.1,
-            true
-        )
-        
-        button.BackgroundColor3 = Color3.fromRGB(
-            math.max(originalColor.R * 255 - 20, 0),
-            math.max(originalColor.G * 255 - 20, 0),
-            math.max(originalColor.B * 255 - 20, 0)
-        )
-    end)
-    
-    button.MouseButton1Up:Connect(function()
-        button:TweenSize(originalSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
-        button.BackgroundColor3 = originalColor
-    end)
-end
+-- Handle window resize
+UserInputService.WindowFocused:Connect(updateSizeBasedOnScreen)
+UserInputService.WindowFocusReleased:Connect(updateSizeBasedOnScreen)
 
--- Apply button effects to all interactive buttons
-addButtonEffect(ApplyButton)
-addButtonEffect(DropdownButton)
-addButtonEffect(HideButton)
-addButtonEffect(MiniButton)
+-- Show initial status
+StatusText.Text = "Select a message to edit"
+StatusDot.BackgroundColor3 = Color3.fromRGB(255, 165, 0) -- Orange for waiting
