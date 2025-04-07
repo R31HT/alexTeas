@@ -9,32 +9,45 @@ local isMobile = UserInputService.TouchEnabled and not UserInputService.Keyboard
 -- Troll GUI Setup
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MessageBamboozlerGUI"
+ScreenGui.ResetOnSpawn = false -- Keep GUI when character respawns
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = localPlayer:WaitForChild("PlayerGui")
 
--- Scale factors based on device type
-local scaleX = isMobile and 0.8 or 1
-local scaleY = isMobile and 0.8 or 1
+-- Scale factors based on device type 
+-- Increased scaling for mobile to make everything bigger and more touch-friendly
+local scaleX = isMobile and 1.1 or 1
+local scaleY = isMobile and 1.1 or 1
 local baseWidth = 300 * scaleX
-local baseHeight = 300 * scaleY
+local baseHeight = 320 * scaleY -- Increased base height for better spacing
 
 -- Main Frame with trollface theme
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, baseWidth, 0, baseHeight)
-MainFrame.Position = UDim2.new(0.5, -baseWidth/2, isMobile and 0.3 or 0.7, -baseHeight/2) -- Higher position on mobile
+MainFrame.Position = UDim2.new(0.5, -baseWidth/2, isMobile and 0.2 or 0.6, -baseHeight/2) -- Higher position on mobile
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
+
 -- Title Bar
 local TitleBar = Instance.new("Frame")
 TitleBar.Name = "TitleBar"
-TitleBar.Size = UDim2.new(1, 0, 0, 30 * scaleY)
+TitleBar.Size = UDim2.new(1, 0, 0, 35 * scaleY) -- Taller title bar for mobile
 TitleBar.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
 TitleBar.BorderSizePixel = 0
 TitleBar.Parent = MainFrame
+
+-- Rounded corners for title bar
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 8)
+TitleCorner.Parent = TitleBar
 
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
@@ -42,20 +55,20 @@ Title.Size = UDim2.new(1, 0, 1, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "🤡 Message Bamboozler 🤡"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 16 * scaleY
+Title.TextSize = 18 * scaleY -- Larger text for mobile
 Title.Font = Enum.Font.GothamBold
 Title.Parent = TitleBar
 
 -- Hide/Show Button
 local HideButton = Instance.new("TextButton")
-HideButton.Name = "HideButton"
-HideButton.Size = UDim2.new(0, 30 * scaleX, 0, 30 * scaleY)
-HideButton.Position = UDim2.new(1, -30 * scaleX, 0, 0)
+HideButton.Name = "HideButton" 
+HideButton.Size = UDim2.new(0, 35 * scaleX, 0, 35 * scaleY) -- Larger button for mobile
+HideButton.Position = UDim2.new(1, -35 * scaleX, 0, 0)
 HideButton.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
 HideButton.BorderSizePixel = 0
 HideButton.Text = "-"
 HideButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-HideButton.TextSize = 24 * scaleY
+HideButton.TextSize = 28 * scaleY -- Larger text
 HideButton.Font = Enum.Font.GothamBold
 HideButton.Parent = TitleBar
 
@@ -63,11 +76,11 @@ HideButton.Parent = TitleBar
 local Description = Instance.new("TextLabel")
 Description.Name = "Description"
 Description.Size = UDim2.new(1, -20 * scaleX, 0, 40 * scaleY)
-Description.Position = UDim2.new(0, 10 * scaleX, 0, 35 * scaleY)
+Description.Position = UDim2.new(0, 10 * scaleX, 0, 40 * scaleY)
 Description.BackgroundTransparency = 1
 Description.Text = "Select one of your messages and change what it appears to say!"
 Description.TextColor3 = Color3.fromRGB(255, 255, 255)
-Description.TextSize = isMobile and 14 or 12
+Description.TextSize = isMobile and 16 or 14 -- Larger text for mobile
 Description.TextWrapped = true
 Description.Font = Enum.Font.Gotham
 Description.Parent = MainFrame
@@ -76,36 +89,41 @@ Description.Parent = MainFrame
 local HistoryLabel = Instance.new("TextLabel")
 HistoryLabel.Name = "HistoryLabel"
 HistoryLabel.Size = UDim2.new(0, 150 * scaleX, 0, 20 * scaleY)
-HistoryLabel.Position = UDim2.new(0, 15 * scaleX, 0, 75 * scaleY)
+HistoryLabel.Position = UDim2.new(0, 15 * scaleX, 0, 80 * scaleY)
 HistoryLabel.BackgroundTransparency = 1
 HistoryLabel.Text = "Your Recent Messages:"
 HistoryLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-HistoryLabel.TextSize = isMobile and 16 or 14
+HistoryLabel.TextSize = isMobile and 18 or 16 -- Larger text for mobile
 HistoryLabel.TextXAlignment = Enum.TextXAlignment.Left
 HistoryLabel.Font = Enum.Font.GothamSemibold
 HistoryLabel.Parent = MainFrame
 
 -- Calculate dropdown position and size
 local dropdownWidth = 270 * scaleX
-local dropdownHeight = 30 * scaleY
+local dropdownHeight = 35 * scaleY -- Taller dropdown for mobile
 
 -- Message History Dropdown
 local MessageDropdown = Instance.new("Frame")
 MessageDropdown.Name = "MessageDropdown"
 MessageDropdown.Size = UDim2.new(0, dropdownWidth, 0, dropdownHeight)
-MessageDropdown.Position = UDim2.new(0, 15 * scaleX, 0, 95 * scaleY)
+MessageDropdown.Position = UDim2.new(0, 15 * scaleX, 0, 100 * scaleY)
 MessageDropdown.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 MessageDropdown.BorderColor3 = Color3.fromRGB(100, 100, 100)
 MessageDropdown.Parent = MainFrame
 
+-- Rounded corners for dropdown
+local DropdownCorner = Instance.new("UICorner")
+DropdownCorner.CornerRadius = UDim.new(0, 6)
+DropdownCorner.Parent = MessageDropdown
+
 local SelectedMessage = Instance.new("TextLabel")
 SelectedMessage.Name = "SelectedMessage"
-SelectedMessage.Size = UDim2.new(1, -30 * scaleX, 1, 0)
-SelectedMessage.Position = UDim2.new(0, 5 * scaleX, 0, 0)
+SelectedMessage.Size = UDim2.new(1, -35 * scaleX, 1, 0)
+SelectedMessage.Position = UDim2.new(0, 10 * scaleX, 0, 0)
 SelectedMessage.BackgroundTransparency = 1
 SelectedMessage.Text = "Select a message..."
 SelectedMessage.TextColor3 = Color3.fromRGB(255, 255, 255)
-SelectedMessage.TextSize = isMobile and 16 or 14
+SelectedMessage.TextSize = isMobile and 18 or 16 -- Larger text for mobile
 SelectedMessage.TextXAlignment = Enum.TextXAlignment.Left
 SelectedMessage.Font = Enum.Font.Gotham
 SelectedMessage.TextTruncate = Enum.TextTruncate.AtEnd
@@ -113,107 +131,128 @@ SelectedMessage.Parent = MessageDropdown
 
 local DropdownButton = Instance.new("TextButton")
 DropdownButton.Name = "DropdownButton"
-DropdownButton.Size = UDim2.new(0, 30 * scaleX, 1, 0)
-DropdownButton.Position = UDim2.new(1, -30 * scaleX, 0, 0)
+DropdownButton.Size = UDim2.new(0, 35 * scaleX, 1, 0) -- Wider button for mobile
+DropdownButton.Position = UDim2.new(1, -35 * scaleX, 0, 0)
 DropdownButton.BackgroundTransparency = 1
 DropdownButton.Text = "▼"
 DropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-DropdownButton.TextSize = isMobile and 16 or 14
+DropdownButton.TextSize = isMobile and 18 or 16 -- Larger text for mobile
 DropdownButton.Font = Enum.Font.GothamBold
 DropdownButton.Parent = MessageDropdown
 
 -- Dropdown List (Initially hidden)
 local DropdownList = Instance.new("ScrollingFrame")
 DropdownList.Name = "DropdownList"
-DropdownList.Size = UDim2.new(0, dropdownWidth, 0, isMobile and 120 or 100) -- Taller on mobile
+DropdownList.Size = UDim2.new(0, dropdownWidth, 0, isMobile and 130 or 110) -- Taller on mobile
 DropdownList.Position = UDim2.new(0, 0, 1, 0)
 DropdownList.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 DropdownList.BorderColor3 = Color3.fromRGB(100, 100, 100)
-DropdownList.ScrollBarThickness = isMobile and 6 or 4 -- Thicker scrollbar for mobile
+DropdownList.ScrollBarThickness = isMobile and 8 or 6 -- Thicker scrollbar for mobile
 DropdownList.ZIndex = 10 -- Ensure dropdown appears above other elements
 DropdownList.Visible = false
 DropdownList.Parent = MessageDropdown
 
+-- Rounded corners for dropdown list
+local ListCorner = Instance.new("UICorner")
+ListCorner.CornerRadius = UDim.new(0, 6)
+ListCorner.Parent = DropdownList
+
 local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 2) -- Add spacing between items
 UIListLayout.Parent = DropdownList
 
 -- Fake Message Input (positioned below the dropdown list's maximum extent)
-local fakeInputY = 135 * scaleY
+local fakeInputY = 145 * scaleY
 if isMobile then
     fakeInputY = 155 * scaleY -- Move down a bit more on mobile to avoid overlap
 end
 
 local FakeLabel = Instance.new("TextLabel")
 FakeLabel.Name = "FakeLabel"
-FakeLabel.Size = UDim2.new(0, 150 * scaleX, 0, 20 * scaleY)
+FakeLabel.Size = UDim2.new(0, 150 * scaleX, 0, 22 * scaleY)
 FakeLabel.Position = UDim2.new(0, 15 * scaleX, 0, fakeInputY)
 FakeLabel.BackgroundTransparency = 1
 FakeLabel.Text = "Fake Message:"
 FakeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-FakeLabel.TextSize = isMobile and 16 or 14
+FakeLabel.TextSize = isMobile and 18 or 16 -- Larger text for mobile
 FakeLabel.TextXAlignment = Enum.TextXAlignment.Left
 FakeLabel.Font = Enum.Font.GothamSemibold
 FakeLabel.Parent = MainFrame
 
 local FakeInput = Instance.new("TextBox")
 FakeInput.Name = "FakeInput"
-FakeInput.Size = UDim2.new(0, 270 * scaleX, 0, 30 * scaleY)
-FakeInput.Position = UDim2.new(0, 15 * scaleX, 0, fakeInputY + 20 * scaleY)
+FakeInput.Size = UDim2.new(0, 270 * scaleX, 0, 35 * scaleY) -- Taller input for mobile
+FakeInput.Position = UDim2.new(0, 15 * scaleX, 0, fakeInputY + 22 * scaleY)
 FakeInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 FakeInput.BorderColor3 = Color3.fromRGB(100, 100, 100)
 FakeInput.Text = "pick blue"
 FakeInput.PlaceholderText = "What they'll see instead..."
 FakeInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-FakeInput.TextSize = isMobile and 16 or 14
+FakeInput.TextSize = isMobile and 18 or 16 -- Larger text for mobile
 FakeInput.ClearTextOnFocus = false
 FakeInput.Font = Enum.Font.Gotham
 FakeInput.Parent = MainFrame
 
+-- Rounded corners for text input
+local InputCorner = Instance.new("UICorner")
+InputCorner.CornerRadius = UDim.new(0, 6)
+InputCorner.Parent = FakeInput
+
 -- Apply Button (positioned below the fake input)
-local applyButtonY = fakeInputY + 60 * scaleY
+local applyButtonY = fakeInputY + 65 * scaleY
 
 local ApplyButton = Instance.new("TextButton")
 ApplyButton.Name = "ApplyButton"
-ApplyButton.Size = UDim2.new(0, 120 * scaleX, 0, 35 * scaleY) -- Taller on mobile
-ApplyButton.Position = UDim2.new(0.5, -60 * scaleX, 0, applyButtonY)
+ApplyButton.Size = UDim2.new(0, 140 * scaleX, 0, 42 * scaleY) -- Taller and wider button for mobile
+ApplyButton.Position = UDim2.new(0.5, -70 * scaleX, 0, applyButtonY)
 ApplyButton.BackgroundColor3 = Color3.fromRGB(65, 180, 65)
 ApplyButton.BorderColor3 = Color3.fromRGB(40, 120, 40)
 ApplyButton.Text = "APPLY CHANGE"
 ApplyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ApplyButton.TextSize = isMobile and 16 or 14
+ApplyButton.TextSize = isMobile and 18 or 16 -- Larger text for mobile
 ApplyButton.Font = Enum.Font.GothamBold
 ApplyButton.Parent = MainFrame
 
+-- Rounded corners for apply button
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(0, 8)
+ButtonCorner.Parent = ApplyButton
+
 -- Preset Button Container - reposition below Apply Button
-local presetY = applyButtonY + 45 * scaleY
+local presetY = applyButtonY + 52 * scaleY
 
 local PresetContainer = Instance.new("Frame")
 PresetContainer.Name = "PresetContainer"
-PresetContainer.Size = UDim2.new(0, 270 * scaleX, 0, 30 * scaleY)
+PresetContainer.Size = UDim2.new(0, 270 * scaleX, 0, 35 * scaleY)
 PresetContainer.Position = UDim2.new(0, 15 * scaleX, 0, presetY)
 PresetContainer.BackgroundTransparency = 1
 PresetContainer.Parent = MainFrame
 
 -- Status indicator - moved to the very bottom
-local statusY = presetY + 35 * scaleY
+local statusY = presetY + 40 * scaleY
 
 local StatusDot = Instance.new("Frame")
 StatusDot.Name = "StatusDot"
-StatusDot.Size = UDim2.new(0, 8 * scaleX, 0, 8 * scaleY)
+StatusDot.Size = UDim2.new(0, 10 * scaleX, 0, 10 * scaleY) -- Larger dot for mobile
 StatusDot.Position = UDim2.new(0, 15 * scaleX, 0, statusY)
 StatusDot.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
 StatusDot.BorderSizePixel = 0
 StatusDot.Parent = MainFrame
 
+-- Round the status dot
+local DotCorner = Instance.new("UICorner")
+DotCorner.CornerRadius = UDim.new(1, 0) -- Makes it a perfect circle
+DotCorner.Parent = StatusDot
+
 local StatusText = Instance.new("TextLabel")
 StatusText.Name = "StatusText"
-StatusText.Size = UDim2.new(1, -35 * scaleX, 0, 20 * scaleY)
+StatusText.Size = UDim2.new(1, -35 * scaleX, 0, 22 * scaleY)
 StatusText.Position = UDim2.new(0, 30 * scaleX, 0, statusY - 6 * scaleY)
 StatusText.BackgroundTransparency = 1
 StatusText.Text = "Select a message to bamboozle"
 StatusText.TextColor3 = Color3.fromRGB(180, 180, 180)
-StatusText.TextSize = isMobile and 14 or 12
+StatusText.TextSize = isMobile and 16 or 14 -- Larger text for mobile
 StatusText.TextXAlignment = Enum.TextXAlignment.Left
 StatusText.Font = Enum.Font.Gotham
 StatusText.Parent = MainFrame
@@ -221,15 +260,20 @@ StatusText.Parent = MainFrame
 -- Mini button to show GUI when hidden (made bigger for mobile)
 local MiniButton = Instance.new("TextButton")
 MiniButton.Name = "MiniButton"
-MiniButton.Size = UDim2.new(0, isMobile and 40 or 30, 0, isMobile and 40 or 30)
-MiniButton.Position = UDim2.new(0, 5, 0, -35 * scaleY)
+MiniButton.Size = UDim2.new(0, isMobile and 50 or 40, 0, isMobile and 50 or 40) -- Much bigger for mobile
+MiniButton.Position = UDim2.new(0, 5, 0.1, 0) -- Better position for visibility
 MiniButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MiniButton.BorderSizePixel = 0
 MiniButton.Text = "🤡"
 MiniButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-MiniButton.TextSize = isMobile and 24 or 18
+MiniButton.TextSize = isMobile and 28 or 22 -- Larger text for mobile
 MiniButton.Visible = false
 MiniButton.Parent = ScreenGui
+
+-- Add shadow and rounded corners to mini button
+local MiniCorner = Instance.new("UICorner")
+MiniCorner.CornerRadius = UDim.new(0.2, 0)
+MiniCorner.Parent = MiniButton
 
 -- Script Variables
 local messageHistory = {}
@@ -257,29 +301,50 @@ DropdownButton.MouseButton1Click:Connect(function()
     DropdownButton.Text = isDropdownOpen and "▲" or "▼" -- Change arrow direction
 end)
 
--- Close dropdown when clicking elsewhere
+-- IMPROVED: Close dropdown only when clicking elsewhere in the GUI
+-- We need to track input events more carefully
 UserInputService.InputBegan:Connect(function(input)
+    if not isDropdownOpen then return end -- Only check if dropdown is open
+    
     if input.UserInputType == Enum.UserInputType.MouseButton1 or 
        input.UserInputType == Enum.UserInputType.Touch then
-        local position = input.Position
+        
+        -- Get input position
+        local position = UserInputService:GetMouseLocation()
+        
+        -- Get positions and sizes of relevant UI elements
         local dropdownAbsPosition = MessageDropdown.AbsolutePosition
         local dropdownAbsSize = MessageDropdown.AbsoluteSize
         local listAbsPosition = DropdownList.AbsolutePosition
         local listAbsSize = DropdownList.AbsoluteSize
-
-        -- If click/touch is outside the dropdown and list
-        if isDropdownOpen and
-           not (position.X >= dropdownAbsPosition.X and 
-                position.X <= dropdownAbsPosition.X + dropdownAbsSize.X and
-                position.Y >= dropdownAbsPosition.Y and 
-                position.Y <= dropdownAbsPosition.Y + dropdownAbsSize.Y) and
-           not (position.X >= listAbsPosition.X and 
-                position.X <= listAbsPosition.X + listAbsSize.X and
-                position.Y >= listAbsPosition.Y and 
-                position.Y <= listAbsPosition.Y + listAbsSize.Y) then
-            isDropdownOpen = false
-            DropdownList.Visible = false
-            DropdownButton.Text = "▼"
+        
+        -- Check if click is inside dropdown or list
+        local insideDropdown = (position.X >= dropdownAbsPosition.X and 
+                             position.X <= dropdownAbsPosition.X + dropdownAbsSize.X and
+                             position.Y >= dropdownAbsPosition.Y and 
+                             position.Y <= dropdownAbsPosition.Y + dropdownAbsSize.Y)
+                             
+        local insideList = (position.X >= listAbsPosition.X and 
+                         position.X <= listAbsPosition.X + listAbsSize.X and
+                         position.Y >= listAbsPosition.Y and 
+                         position.Y <= listAbsPosition.Y + listAbsSize.Y)
+        
+        -- Only close if click is outside both dropdown and list but inside MainFrame
+        if not insideDropdown and not insideList then
+            -- First make sure click is inside MainFrame (don't close when clicking outside GUI)
+            local mainAbsPos = MainFrame.AbsolutePosition
+            local mainAbsSize = MainFrame.AbsoluteSize
+            
+            local insideMain = (position.X >= mainAbsPos.X and 
+                             position.X <= mainAbsPos.X + mainAbsSize.X and
+                             position.Y >= mainAbsPos.Y and 
+                             position.Y <= mainAbsPos.Y + mainAbsSize.Y)
+                             
+            if insideMain then
+                isDropdownOpen = false
+                DropdownList.Visible = false
+                DropdownButton.Text = "▼"
+            end
         end
     end
 end)
@@ -334,11 +399,11 @@ function updateDropdownList()
 
     -- Fill with message history
     local totalHeight = 0
-    local itemHeight = isMobile and 40 or 30 -- Taller items on mobile
+    local itemHeight = isMobile and 45 or 35 -- Much taller items on mobile for better touch targets
 
     for i, msgData in ipairs(messageHistory) do
         local listItem = Instance.new("TextButton")
-        listItem.Size = UDim2.new(1, -8, 0, itemHeight)
+        listItem.Size = UDim2.new(1, -10, 0, itemHeight)
         listItem.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         listItem.BorderSizePixel = 0
         listItem.Text = msgData.text
@@ -351,10 +416,15 @@ function updateDropdownList()
         listItem.LayoutOrder = i
         listItem.TextWrapped = true
         listItem.ZIndex = 11 -- Ensure list items appear above other elements
+        
+        -- Add rounded corners to list items
+        local ItemCorner = Instance.new("UICorner")
+        ItemCorner.CornerRadius = UDim.new(0, 4)
+        ItemCorner.Parent = listItem
 
         -- Add padding
         local UIPadding = Instance.new("UIPadding")
-        UIPadding.PaddingLeft = UDim.new(0, 5 * scaleX)
+        UIPadding.PaddingLeft = UDim.new(0, 8 * scaleX)
         UIPadding.Parent = listItem
 
         -- Click to select
@@ -370,7 +440,7 @@ function updateDropdownList()
             StatusDot.BackgroundColor3 = Color3.fromRGB(65, 180, 65)
         end)
 
-        totalHeight = totalHeight + itemHeight
+        totalHeight = totalHeight + itemHeight + 2 -- Account for padding
     end
 
     -- Update scrolling frame canvas size
@@ -384,15 +454,20 @@ local function createPresetButton(text, position)
     local xPos = position * (buttonWidth + spacing)
 
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, buttonWidth, 0, 25 * scaleY)
+    button.Size = UDim2.new(0, buttonWidth, 0, 30 * scaleY) -- Taller buttons for mobile
     button.Position = UDim2.new(0, xPos, 0, 0)
     button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     button.BorderColor3 = Color3.fromRGB(100, 100, 100)
     button.Text = text
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.TextSize = isMobile and 12 or 10
+    button.TextSize = isMobile and 14 or 12 -- Larger text for mobile
     button.Font = Enum.Font.Gotham
     button.Parent = PresetContainer
+    
+    -- Add rounded corners to preset buttons
+    local PresetCorner = Instance.new("UICorner")
+    PresetCorner.CornerRadius = UDim.new(0, 6)
+    PresetCorner.Parent = button
 
     button.MouseButton1Click:Connect(function()
         FakeInput.Text = text
@@ -455,18 +530,62 @@ ApplyButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Auto-detect screen size for better mobile responsiveness
+-- Mobile optimizations - detect viewport size and adjust accordingly
 local function updateSizeBasedOnScreen()
     local viewportSize = workspace.CurrentCamera.ViewportSize
     
-    -- If screen is very small (likely mobile)
-    if viewportSize.X < 600 or viewportSize.Y < 400 then
-        scaleX = 0.7
-        scaleY = 0.7
-        -- Reposition the frame for better visibility on small screens
-        MainFrame.Position = UDim2.new(0.5, -baseWidth/2 * scaleX, 0.3, -baseHeight/2 * scaleY)
+    -- More intelligent sizing based on screen dimensions
+    if viewportSize.Y < 400 then -- Very small height (extra small screen)
+        scaleX = 0.9
+        scaleY = 0.9
+        MainFrame.Position = UDim2.new(0.5, -baseWidth/2 * scaleX, 0.15, 0) 
+    elseif viewportSize.Y < 600 then -- Small height (typical mobile)
+        scaleX = 1.0
+        scaleY = 1.0
+        MainFrame.Position = UDim2.new(0.5, -baseWidth/2 * scaleX, 0.2, 0)
+    end
+    
+    -- Additional tweaks for very narrow screens
+    if viewportSize.X < 400 then
+        -- For extremely narrow screens, make GUI even more compact
+        MainFrame.Size = UDim2.new(0.95, 0, 0, baseHeight * scaleY)
+        MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset/2, 0.1, 0)
     end
 end
 
 -- Run the size adjustment when the script starts
 updateSizeBasedOnScreen()
+
+-- Add slight animation for button presses
+local function addButtonEffect(button)
+    local originalColor = button.BackgroundColor3
+    local originalSize = button.Size
+    
+    button.MouseButton1Down:Connect(function()
+        button:TweenSize(
+            UDim2.new(originalSize.X.Scale, originalSize.X.Offset * 0.95, 
+                      originalSize.Y.Scale, originalSize.Y.Offset * 0.95),
+            Enum.EasingDirection.Out,
+            Enum.EasingStyle.Quad,
+            0.1,
+            true
+        )
+        
+        button.BackgroundColor3 = Color3.fromRGB(
+            math.max(originalColor.R * 255 - 20, 0),
+            math.max(originalColor.G * 255 - 20, 0),
+            math.max(originalColor.B * 255 - 20, 0)
+        )
+    end)
+    
+    button.MouseButton1Up:Connect(function()
+        button:TweenSize(originalSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
+        button.BackgroundColor3 = originalColor
+    end)
+end
+
+-- Apply button effects to all interactive buttons
+addButtonEffect(ApplyButton)
+addButtonEffect(DropdownButton)
+addButtonEffect(HideButton)
+addButtonEffect(MiniButton)
