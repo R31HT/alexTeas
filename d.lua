@@ -40,7 +40,7 @@ UICorner.Parent = MainFrame
 local TrollBackground = Instance.new("ImageLabel")
 TrollBackground.Size = UDim2.new(1, 0, 1, 0)
 TrollBackground.BackgroundTransparency = 1
-TrollBackground.Image = "rbxassetid://11797062053" -- Trollface asset ID
+TrollBackground.Image = "rbxassetid://6419509504" -- Trollface asset ID
 TrollBackground.ImageTransparency = 0.9 -- Very faint background
 TrollBackground.ScaleType = Enum.ScaleType.Fit
 TrollBackground.Parent = MainFrame
@@ -63,7 +63,7 @@ local TitleIcon = Instance.new("ImageLabel")
 TitleIcon.Size = UDim2.new(0, 25 * scaleY, 0, 25 * scaleY)
 TitleIcon.Position = UDim2.new(0, 5 * scaleX, 0.5, -12.5 * scaleY)
 TitleIcon.BackgroundTransparency = 1
-TitleIcon.Image = "rbxassetid://11797062053" -- Trollface asset ID
+TitleIcon.Image = "rbxassetid://6419509504" -- Trollface asset ID
 TitleIcon.Parent = TitleBar
 
 local Title = Instance.new("TextLabel")
