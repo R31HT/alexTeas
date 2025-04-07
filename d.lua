@@ -3,7 +3,7 @@ local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
 local localPlayer = Players.LocalPlayer
 
--- Check if the user is on mobile
+-- Check if the user is on mobile with more reliable detection
 local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled and not UserInputService.MouseEnabled
 
 -- Troll GUI Setup
@@ -11,9 +11,9 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MessageBamboozlerGUI"
 ScreenGui.Parent = localPlayer:WaitForChild("PlayerGui")
 
--- Scale factors for mobile optimization
-local scaleX = isMobile and 1.2 or 1
-local scaleY = isMobile and 1.2 or 1
+-- Scale factors based on device type
+local scaleX = isMobile and 0.8 or 1
+local scaleY = isMobile and 0.8 or 1
 local baseWidth = 300 * scaleX
 local baseHeight = 300 * scaleY
 
@@ -21,7 +21,7 @@ local baseHeight = 300 * scaleY
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, baseWidth, 0, baseHeight)
-MainFrame.Position = UDim2.new(0.5, -baseWidth/2, isMobile and 0.5 or 0.7, -baseHeight/2)
+MainFrame.Position = UDim2.new(0.5, -baseWidth/2, isMobile and 0.3 or 0.7, -baseHeight/2) -- Higher position on mobile
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -236,6 +236,7 @@ local messageHistory = {}
 local selectedMessageId = nil
 local selectedMessageIndex = nil
 local isDropdownOpen = false
+local processedMessages = {} -- Track message IDs we've already processed
 
 -- Mini Button Logic
 MiniButton.MouseButton1Click:Connect(function()
@@ -265,7 +266,7 @@ UserInputService.InputBegan:Connect(function(input)
         local dropdownAbsSize = MessageDropdown.AbsoluteSize
         local listAbsPosition = DropdownList.AbsolutePosition
         local listAbsSize = DropdownList.AbsoluteSize
-        
+
         -- If click/touch is outside the dropdown and list
         if isDropdownOpen and
            not (position.X >= dropdownAbsPosition.X and 
@@ -283,21 +284,29 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
--- Message history tracker
+-- Message history tracker with duplicate prevention
 TextChatService.OnIncomingMessage = function(message)
     if message.TextSource and message.TextSource.UserId == localPlayer.UserId then
+        -- Check if we've already processed this message ID
+        if processedMessages[message.MessageId] then
+            return -- Skip this message, we've already processed it
+        end
+        
+        -- Mark this message as processed
+        processedMessages[message.MessageId] = true
+        
         -- Add to our message history (only keep last 10)
         table.insert(messageHistory, 1, {
             id = message.MessageId,
             text = message.Text,
             timestamp = os.time()
         })
-        
+
         -- Limit to 10 messages
         if #messageHistory > 10 then
             table.remove(messageHistory, 11)
         end
-        
+
         -- Update dropdown list
         updateDropdownList()
     end
@@ -322,11 +331,11 @@ function updateDropdownList()
             child:Destroy()
         end
     end
-    
+
     -- Fill with message history
     local totalHeight = 0
     local itemHeight = isMobile and 40 or 30 -- Taller items on mobile
-    
+
     for i, msgData in ipairs(messageHistory) do
         local listItem = Instance.new("TextButton")
         listItem.Size = UDim2.new(1, -8, 0, itemHeight)
@@ -342,12 +351,12 @@ function updateDropdownList()
         listItem.LayoutOrder = i
         listItem.TextWrapped = true
         listItem.ZIndex = 11 -- Ensure list items appear above other elements
-        
+
         -- Add padding
         local UIPadding = Instance.new("UIPadding")
         UIPadding.PaddingLeft = UDim.new(0, 5 * scaleX)
         UIPadding.Parent = listItem
-        
+
         -- Click to select
         listItem.MouseButton1Click:Connect(function()
             SelectedMessage.Text = msgData.text
@@ -356,14 +365,14 @@ function updateDropdownList()
             isDropdownOpen = false
             DropdownList.Visible = false
             DropdownButton.Text = "▼"
-            
+
             StatusText.Text = "Ready to bamboozle! Click Apply"
             StatusDot.BackgroundColor3 = Color3.fromRGB(65, 180, 65)
         end)
-        
+
         totalHeight = totalHeight + itemHeight
     end
-    
+
     -- Update scrolling frame canvas size
     DropdownList.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
 end
@@ -373,7 +382,7 @@ local function createPresetButton(text, position)
     local buttonWidth = isMobile and 85 * scaleX or 80 * scaleX
     local spacing = isMobile and 5 * scaleX or 7.5 * scaleX
     local xPos = position * (buttonWidth + spacing)
-    
+
     local button = Instance.new("TextButton")
     button.Size = UDim2.new(0, buttonWidth, 0, 25 * scaleY)
     button.Position = UDim2.new(0, xPos, 0, 0)
@@ -384,11 +393,11 @@ local function createPresetButton(text, position)
     button.TextSize = isMobile and 12 or 10
     button.Font = Enum.Font.Gotham
     button.Parent = PresetContainer
-    
+
     button.MouseButton1Click:Connect(function()
         FakeInput.Text = text
     end)
-    
+
     return button
 end
 
@@ -404,15 +413,15 @@ ApplyButton.MouseButton1Click:Connect(function()
         StatusDot.BackgroundColor3 = Color3.fromRGB(255, 165, 0) -- Orange for warning
         return
     end
-    
+
     -- Get the fake message text
     local fakeText = FakeInput.Text
     if fakeText == "" then fakeText = "pick blue" end
-    
+
     -- Store the selected message ID before it gets cleared
     local currentMessageId = selectedMessageId
     local currentIndex = selectedMessageIndex
-    
+
     -- Try to replicate signal ONLY ONCE for the selected message
     local success, error = pcall(function()
         replicatesignal(game.TextChatService.ClientToServerMessageReplicateSignalV2,
@@ -423,28 +432,20 @@ ApplyButton.MouseButton1Click:Connect(function()
             TextChatService.TextChannels.RBXGeneral
         )
     end)
-    
+
     if success then
         StatusDot.BackgroundColor3 = Color3.fromRGB(65, 180, 65) -- Green for success
         StatusText.Text = "Message changed to: " .. fakeText
-        
+
         -- Update the message in our history
         if currentIndex and messageHistory[currentIndex] then
-            -- Add the edited message at the top of the history
-            table.insert(messageHistory, 1, {
-                id = currentMessageId,
-                text = fakeText,
-                timestamp = os.time()
-            })
-            
-            -- Remove the old message from the history
-            table.remove(messageHistory, currentIndex + 1)
+            messageHistory[currentIndex].text = fakeText -- Update the message text directly
             
             -- Update the dropdown
             updateDropdownList()
         end
-        
-        -- Clear selection after successful edit
+
+        -- Reset selection
         selectedMessageId = nil
         selectedMessageIndex = nil
         SelectedMessage.Text = "Select a message..."
@@ -453,3 +454,19 @@ ApplyButton.MouseButton1Click:Connect(function()
         StatusText.Text = "Error! Try again."
     end
 end)
+
+-- Auto-detect screen size for better mobile responsiveness
+local function updateSizeBasedOnScreen()
+    local viewportSize = workspace.CurrentCamera.ViewportSize
+    
+    -- If screen is very small (likely mobile)
+    if viewportSize.X < 600 or viewportSize.Y < 400 then
+        scaleX = 0.7
+        scaleY = 0.7
+        -- Reposition the frame for better visibility on small screens
+        MainFrame.Position = UDim2.new(0.5, -baseWidth/2 * scaleX, 0.3, -baseHeight/2 * scaleY)
+    end
+end
+
+-- Run the size adjustment when the script starts
+updateSizeBasedOnScreen()
