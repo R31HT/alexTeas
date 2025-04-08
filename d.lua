@@ -140,11 +140,11 @@ DropdownButton.TextSize = isMobile and 18 or 16 -- Larger text for mobile
 DropdownButton.Font = Enum.Font.GothamBold
 DropdownButton.Parent = MessageDropdown
 
--- FIXED: Dropdown List - Now positioned BELOW the dropdown control
+-- Dropdown List - MODIFIED: Now positioned ABOVE the dropdown control for better visibility
 local DropdownList = Instance.new("ScrollingFrame")
 DropdownList.Name = "DropdownList"
 DropdownList.Size = UDim2.new(0, dropdownWidth, 0, isMobile and 130 or 110) -- Taller on mobile
-DropdownList.Position = UDim2.new(0, 0, 1, 0) -- Position BELOW the dropdown
+DropdownList.Position = UDim2.new(0, 0, 0, -DropdownList.Size.Y.Offset) -- Position ABOVE the dropdown
 DropdownList.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 DropdownList.BorderColor3 = Color3.fromRGB(100, 100, 100)
 DropdownList.ScrollBarThickness = isMobile and 8 or 6 -- Thicker scrollbar for mobile
@@ -163,7 +163,7 @@ UIListLayout.Padding = UDim.new(0, 2) -- Add spacing between items
 UIListLayout.Parent = DropdownList
 
 -- Fake Message Input (positioned below the dropdown)
-local fakeInputY = 145 * scaleY + DropdownList.Size.Y.Offset -- FIXED: Adjust to accommodate dropdown
+local fakeInputY = 145 * scaleY
 
 local FakeLabel = Instance.new("TextLabel")
 FakeLabel.Name = "FakeLabel"
@@ -291,31 +291,15 @@ HideButton.MouseButton1Click:Connect(function()
     MiniButton.Visible = true
 end)
 
--- FIXED: Dropdown Toggle Logic
+-- Dropdown Toggle Logic
 DropdownButton.MouseButton1Click:Connect(function()
-    -- Toggle dropdown state
     isDropdownOpen = not isDropdownOpen
-    
-    -- Show/hide dropdown list based on state
     DropdownList.Visible = isDropdownOpen
-    
-    -- Change arrow direction
-    DropdownButton.Text = isDropdownOpen and "▲" or "▼"
-    
-    -- Make sure it doesn't reopen when clicking twice
-    if isDropdownOpen then
-        -- Only adjust positions when opening
-        local freeSpaceBelow = baseHeight - (MessageDropdown.Position.Y.Offset + dropdownHeight)
-        
-        if freeSpaceBelow < DropdownList.Size.Y.Offset then
-            -- Not enough space below, but don't move it above
-            -- Instead, limit the height to available space
-            DropdownList.Size = UDim2.new(0, dropdownWidth, 0, math.max(50, freeSpaceBelow - 5))
-        end
-    end
+    DropdownButton.Text = isDropdownOpen and "▲" or "▼" -- Change arrow direction
 end)
 
--- IMPROVED: Close dropdown when clicking elsewhere in the GUI
+-- IMPROVED: Close dropdown only when clicking elsewhere in the GUI
+-- We need to track input events more carefully
 UserInputService.InputBegan:Connect(function(input)
     if not isDropdownOpen then return end -- Only check if dropdown is open
 
@@ -325,12 +309,13 @@ UserInputService.InputBegan:Connect(function(input)
         -- Get input position
         local position = UserInputService:GetMouseLocation()
 
-        -- Check if click is inside dropdown or list
+        -- Get positions and sizes of relevant UI elements
         local dropdownAbsPosition = MessageDropdown.AbsolutePosition
         local dropdownAbsSize = MessageDropdown.AbsoluteSize
         local listAbsPosition = DropdownList.AbsolutePosition
         local listAbsSize = DropdownList.AbsoluteSize
 
+        -- Check if click is inside dropdown or list
         local insideDropdown = (position.X >= dropdownAbsPosition.X and 
                              position.X <= dropdownAbsPosition.X + dropdownAbsSize.X and
                              position.Y >= dropdownAbsPosition.Y and 
@@ -341,11 +326,22 @@ UserInputService.InputBegan:Connect(function(input)
                          position.Y >= listAbsPosition.Y and 
                          position.Y <= listAbsPosition.Y + listAbsSize.Y)
 
-        -- Close dropdown if click is outside both dropdown and list
+        -- Only close if click is outside both dropdown and list but inside MainFrame
         if not insideDropdown and not insideList then
-            isDropdownOpen = false
-            DropdownList.Visible = false
-            DropdownButton.Text = "▼"
+            -- First make sure click is inside MainFrame (don't close when clicking outside GUI)
+            local mainAbsPos = MainFrame.AbsolutePosition
+            local mainAbsSize = MainFrame.AbsoluteSize
+
+            local insideMain = (position.X >= mainAbsPos.X and 
+                             position.X <= mainAbsPos.X + mainAbsSize.X and
+                             position.Y >= mainAbsPos.Y and 
+                             position.Y <= mainAbsPos.Y + mainAbsSize.Y)
+
+            if insideMain then
+                isDropdownOpen = false
+                DropdownList.Visible = false
+                DropdownButton.Text = "▼"
+            end
         end
     end
 end)
@@ -531,7 +527,7 @@ ApplyButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- FIXED: Update layout function to properly account for dropdown
+-- Mobile optimizations - detect viewport size and adjust accordingly
 local function updateSizeBasedOnScreen()
     local viewportSize = workspace.CurrentCamera.ViewportSize
 
@@ -558,13 +554,6 @@ local function updateSizeBasedOnScreen()
     if contentHeight > baseHeight then
         -- Increase frame height if needed
         MainFrame.Size = UDim2.new(0, baseWidth, 0, contentHeight)
-    end
-    
-    -- Adjust dropdown list max height based on available space
-    local freeSpaceBelow = baseHeight - (MessageDropdown.Position.Y.Offset + dropdownHeight)
-    if freeSpaceBelow < DropdownList.Size.Y.Offset + 50 then
-        -- Not enough space below, limit the height
-        DropdownList.Size = UDim2.new(0, dropdownWidth, 0, math.max(50, freeSpaceBelow - 10))
     end
 end
 
@@ -604,3 +593,4 @@ addButtonEffect(ApplyButton)
 addButtonEffect(DropdownButton)
 addButtonEffect(HideButton)
 addButtonEffect(MiniButton)
+The drop down menu isn't a drop down menu but it's a drop up menu, when I click it it goes up instead of down also just make it go down but just make it not overlap with the text if that'spossibleq also, when I click on drop down twice it opens again???? Shouldn't it close
