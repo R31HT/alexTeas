@@ -11,15 +11,16 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = localPlayer:WaitForChild("PlayerGui")
 
-local scaleX = isMobile and 1.1 or 1
-local scaleY = isMobile and 1.1 or 1
+-- Scale adjustments for mobile
+local scaleX = isMobile and 0.9 or 1
+local scaleY = isMobile and 0.9 or 1
 local baseWidth = 300 * scaleX
 local baseHeight = 360 * scaleY
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, baseWidth, 0, baseHeight)
-MainFrame.Position = UDim2.new(0.5, -baseWidth/2, isMobile and 0.2 or 0.5, -baseHeight/2)
+MainFrame.Position = UDim2.new(0.5, -baseWidth/2, isMobile and 0.15 or 0.5, -baseHeight/2)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -70,7 +71,7 @@ Description.Position = UDim2.new(0, 10 * scaleX, 0, 40 * scaleY)
 Description.BackgroundTransparency = 1
 Description.Text = "Select one of your messages and change what it appears to say!"
 Description.TextColor3 = Color3.fromRGB(255, 255, 255)
-Description.TextSize = isMobile and 16 or 14
+Description.TextSize = isMobile and 14 or 14
 Description.TextWrapped = true
 Description.Font = Enum.Font.Gotham
 Description.Parent = MainFrame
@@ -82,7 +83,7 @@ HistoryLabel.Position = UDim2.new(0, 15 * scaleX, 0, 80 * scaleY)
 HistoryLabel.BackgroundTransparency = 1
 HistoryLabel.Text = "Your Recent Messages:"
 HistoryLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-HistoryLabel.TextSize = isMobile and 18 or 16
+HistoryLabel.TextSize = isMobile and 16 or 16
 HistoryLabel.TextXAlignment = Enum.TextXAlignment.Left
 HistoryLabel.Font = Enum.Font.GothamSemibold
 HistoryLabel.Parent = MainFrame
@@ -109,7 +110,7 @@ SelectedMessage.Position = UDim2.new(0, 10 * scaleX, 0, 0)
 SelectedMessage.BackgroundTransparency = 1
 SelectedMessage.Text = "Select a message..."
 SelectedMessage.TextColor3 = Color3.fromRGB(255, 255, 255)
-SelectedMessage.TextSize = isMobile and 18 or 16
+SelectedMessage.TextSize = isMobile and 16 or 16
 SelectedMessage.TextXAlignment = Enum.TextXAlignment.Left
 SelectedMessage.Font = Enum.Font.Gotham
 SelectedMessage.TextTruncate = Enum.TextTruncate.AtEnd
@@ -122,17 +123,17 @@ DropdownButton.Position = UDim2.new(1, -35 * scaleX, 0, 0)
 DropdownButton.BackgroundTransparency = 1
 DropdownButton.Text = "▼"
 DropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-DropdownButton.TextSize = isMobile and 18 or 16
+DropdownButton.TextSize = isMobile and 16 or 16
 DropdownButton.Font = Enum.Font.GothamBold
 DropdownButton.Parent = MessageDropdown
 
 local DropdownList = Instance.new("ScrollingFrame")
 DropdownList.Name = "DropdownList"
-DropdownList.Size = UDim2.new(0, dropdownWidth, 0, isMobile and 130 or 110)
-DropdownList.Position = UDim2.new(0, 0, 1, 0)
+DropdownList.Size = UDim2.new(0, dropdownWidth, 0, isMobile and 110 or 110)
+DropdownList.Position = UDim2.new(0, 0, 0, -DropdownList.Size.Y.Offset) -- Position above dropdown instead of below
 DropdownList.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 DropdownList.BorderColor3 = Color3.fromRGB(100, 100, 100)
-DropdownList.ScrollBarThickness = isMobile and 8 or 6
+DropdownList.ScrollBarThickness = isMobile and 6 or 6
 DropdownList.ZIndex = 10
 DropdownList.Visible = false
 DropdownList.Parent = MessageDropdown
@@ -155,7 +156,7 @@ FakeLabel.Position = UDim2.new(0, 15 * scaleX, 0, fakeInputY)
 FakeLabel.BackgroundTransparency = 1
 FakeLabel.Text = "Fake Message:"
 FakeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-FakeLabel.TextSize = isMobile and 18 or 16
+FakeLabel.TextSize = isMobile and 16 or 16
 FakeLabel.TextXAlignment = Enum.TextXAlignment.Left
 FakeLabel.Font = Enum.Font.GothamSemibold
 FakeLabel.Parent = MainFrame
@@ -169,7 +170,7 @@ FakeInput.BorderColor3 = Color3.fromRGB(100, 100, 100)
 FakeInput.Text = "dementia is goated"
 FakeInput.PlaceholderText = "What they'll see instead..."
 FakeInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-FakeInput.TextSize = isMobile and 18 or 16
+FakeInput.TextSize = isMobile and 16 or 16
 FakeInput.ClearTextOnFocus = false
 FakeInput.Font = Enum.Font.Gotham
 FakeInput.Parent = MainFrame
@@ -188,7 +189,7 @@ ApplyButton.BackgroundColor3 = Color3.fromRGB(65, 180, 65)
 ApplyButton.BorderColor3 = Color3.fromRGB(40, 120, 40)
 ApplyButton.Text = "APPLY CHANGE"
 ApplyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ApplyButton.TextSize = isMobile and 18 or 16
+ApplyButton.TextSize = isMobile and 16 or 16
 ApplyButton.Font = Enum.Font.GothamBold
 ApplyButton.Parent = MainFrame
 
@@ -226,20 +227,20 @@ StatusText.Position = UDim2.new(0, 30 * scaleX, 0, statusY - 6 * scaleY)
 StatusText.BackgroundTransparency = 1
 StatusText.Text = "Select a message to bamboozle"
 StatusText.TextColor3 = Color3.fromRGB(180, 180, 180)
-StatusText.TextSize = isMobile and 16 or 14
+StatusText.TextSize = isMobile and 14 or 14
 StatusText.TextXAlignment = Enum.TextXAlignment.Left
 StatusText.Font = Enum.Font.Gotham
 StatusText.Parent = MainFrame
 
 local MiniButton = Instance.new("TextButton")
 MiniButton.Name = "MiniButton"
-MiniButton.Size = UDim2.new(0, isMobile and 50 or 40, 0, isMobile and 50 or 40)
+MiniButton.Size = UDim2.new(0, isMobile and 40 or 40, 0, isMobile and 40 or 40)
 MiniButton.Position = UDim2.new(0, 5, 0.1, 0)
 MiniButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MiniButton.BorderSizePixel = 0
 MiniButton.Text = "🤡"
 MiniButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-MiniButton.TextSize = isMobile and 28 or 22
+MiniButton.TextSize = isMobile and 22 or 22
 MiniButton.Visible = false
 MiniButton.Parent = ScreenGui
 
@@ -356,7 +357,7 @@ function updateDropdownList()
     end
 
     local totalHeight = 0
-    local itemHeight = isMobile and 45 or 35
+    local itemHeight = isMobile and 35 or 35
 
     for i, msgData in ipairs(messageHistory) do
         local listItem = Instance.new("TextButton")
@@ -365,7 +366,7 @@ function updateDropdownList()
         listItem.BorderSizePixel = 0
         listItem.Text = msgData.text
         listItem.TextColor3 = Color3.fromRGB(255, 255, 255)
-        listItem.TextSize = isMobile and 16 or 14
+        listItem.TextSize = isMobile and 14 or 14
         listItem.Font = Enum.Font.Gotham
         listItem.TextXAlignment = Enum.TextXAlignment.Left
         listItem.TextTruncate = Enum.TextTruncate.AtEnd
@@ -401,7 +402,7 @@ function updateDropdownList()
 end
 
 local function createPresetButton(text, position)
-    local buttonWidth = isMobile and 85 * scaleX or 80 * scaleX
+    local buttonWidth = isMobile and 80 * scaleX or 80 * scaleX
     local spacing = isMobile and 5 * scaleX or 7.5 * scaleX
     local xPos = position * (buttonWidth + spacing)
 
@@ -412,7 +413,7 @@ local function createPresetButton(text, position)
     button.BorderColor3 = Color3.fromRGB(100, 100, 100)
     button.Text = text
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.TextSize = isMobile and 14 or 12
+    button.TextSize = isMobile and 12 or 12
     button.Font = Enum.Font.Gotham
     button.Parent = PresetContainer
 
@@ -475,26 +476,41 @@ end)
 
 local function updateSizeBasedOnScreen()
     local viewportSize = workspace.CurrentCamera.ViewportSize
+    
+    -- More aggressive size reduction for mobile
+    if isMobile then
+        if viewportSize.Y < 500 then
+            scaleX = 0.75
+            scaleY = 0.75
+            MainFrame.Size = UDim2.new(0, baseWidth * scaleX, 0, baseHeight * scaleY)
+            MainFrame.Position = UDim2.new(0.5, -baseWidth * scaleX/2, 0.12, 0)
+        elseif viewportSize.Y < 700 then
+            scaleX = 0.8
+            scaleY = 0.8
+            MainFrame.Size = UDim2.new(0, baseWidth * scaleX, 0, baseHeight * scaleY)
+            MainFrame.Position = UDim2.new(0.5, -baseWidth * scaleX/2, 0.15, 0)
+        end
+    else
+        -- For desktop, make minor adjustments
+        if viewportSize.Y < 600 then
+            scaleX = 0.9
+            scaleY = 0.9
+            MainFrame.Size = UDim2.new(0, baseWidth * scaleX, 0, baseHeight * scaleY)
+            MainFrame.Position = UDim2.new(0.5, -baseWidth * scaleX/2, 0.5, -baseHeight * scaleY/2)
+        end
+    }
 
-    if viewportSize.Y < 400 then
-        scaleX = 0.9
-        scaleY = 0.9
-        MainFrame.Position = UDim2.new(0.5, -baseWidth/2 * scaleX, 0.15, 0) 
-    elseif viewportSize.Y < 600 then
-        scaleX = 1.0
-        scaleY = 1.0
-        MainFrame.Position = UDim2.new(0.5, -baseWidth/2 * scaleX, 0.2, 0)
-    end
+    -- For very small screens, make it take up most of the width
+    if viewportSize.X < 350 then
+        MainFrame.Size = UDim2.new(0.9, 0, 0, baseHeight * scaleY)
+        MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset/2, isMobile and 0.1 or 0.5, isMobile and 0 or -baseHeight * scaleY/2)
+    }
 
-    if viewportSize.X < 400 then
-        MainFrame.Size = UDim2.new(0.95, 0, 0, baseHeight * scaleY)
-        MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset/2, 0.1, 0)
-    end
-
+    -- Make sure content fits
     local contentHeight = statusY + 30 * scaleY
-    if contentHeight > baseHeight then
-        MainFrame.Size = UDim2.new(0, baseWidth, 0, contentHeight)
-    end
+    if contentHeight > baseHeight * scaleY then
+        MainFrame.Size = UDim2.new(MainFrame.Size.X.Scale, MainFrame.Size.X.Offset, 0, contentHeight)
+    }
 end
 
 updateSizeBasedOnScreen()
