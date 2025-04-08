@@ -166,7 +166,7 @@ FakeInput.Size = UDim2.new(0, 270 * scaleX, 0, 35 * scaleY)
 FakeInput.Position = UDim2.new(0, 15 * scaleX, 0, fakeInputY + 22 * scaleY)
 FakeInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 FakeInput.BorderColor3 = Color3.fromRGB(100, 100, 100)
-FakeInput.Text = "pick blue"
+FakeInput.Text = "dementia is goated"
 FakeInput.PlaceholderText = "What they'll see instead..."
 FakeInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 FakeInput.TextSize = isMobile and 18 or 16
@@ -439,7 +439,7 @@ ApplyButton.MouseButton1Click:Connect(function()
     end
 
     local fakeText = FakeInput.Text
-    if fakeText == "" then fakeText = "pick blue" end
+    if fakeText == "" then fakeText = "subscribe to dementia" end
 
     local currentMessageId = selectedMessageId
     local currentIndex = selectedMessageIndex
