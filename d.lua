@@ -11,16 +11,16 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = localPlayer:WaitForChild("PlayerGui")
 
--- Scale adjustments for mobile
-local scaleX = isMobile and 0.9 or 1
-local scaleY = isMobile and 0.9 or 1
+-- Adjust scale based on mobile
+local scaleX = isMobile and 0.8 or 1
+local scaleY = isMobile and 0.8 or 1
 local baseWidth = 300 * scaleX
 local baseHeight = 360 * scaleY
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, baseWidth, 0, baseHeight)
-MainFrame.Position = UDim2.new(0.5, -baseWidth/2, isMobile and 0.15 or 0.5, -baseHeight/2)
+MainFrame.Position = UDim2.new(0.5, -baseWidth/2, isMobile and 0.1 or 0.5, -baseHeight/2)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -127,10 +127,13 @@ DropdownButton.TextSize = isMobile and 16 or 16
 DropdownButton.Font = Enum.Font.GothamBold
 DropdownButton.Parent = MessageDropdown
 
+-- Fixed dropdown position for mobile (positioned upward)
+local dropdownListHeight = isMobile and 110 or 110
 local DropdownList = Instance.new("ScrollingFrame")
 DropdownList.Name = "DropdownList"
-DropdownList.Size = UDim2.new(0, dropdownWidth, 0, isMobile and 110 or 110)
-DropdownList.Position = UDim2.new(0, 0, 0, -DropdownList.Size.Y.Offset) -- Position above dropdown instead of below
+DropdownList.Size = UDim2.new(0, dropdownWidth, 0, dropdownListHeight)
+-- Position dropdown above instead of below on mobile
+DropdownList.Position = UDim2.new(0, 0, isMobile and -dropdownListHeight - 5 or 1, 0)
 DropdownList.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 DropdownList.BorderColor3 = Color3.fromRGB(100, 100, 100)
 DropdownList.ScrollBarThickness = isMobile and 6 or 6
@@ -402,8 +405,8 @@ function updateDropdownList()
 end
 
 local function createPresetButton(text, position)
-    local buttonWidth = isMobile and 80 * scaleX or 80 * scaleX
-    local spacing = isMobile and 5 * scaleX or 7.5 * scaleX
+    local buttonWidth = isMobile and 75 * scaleX or 80 * scaleX
+    local spacing = isMobile and 7.5 * scaleX or 7.5 * scaleX
     local xPos = position * (buttonWidth + spacing)
 
     local button = Instance.new("TextButton")
@@ -473,47 +476,6 @@ ApplyButton.MouseButton1Click:Connect(function()
         StatusText.Text = "Error! Try again."
     end
 end)
-
-local function updateSizeBasedOnScreen()
-    local viewportSize = workspace.CurrentCamera.ViewportSize
-    
-    -- More aggressive size reduction for mobile
-    if isMobile then
-        if viewportSize.Y < 500 then
-            scaleX = 0.75
-            scaleY = 0.75
-            MainFrame.Size = UDim2.new(0, baseWidth * scaleX, 0, baseHeight * scaleY)
-            MainFrame.Position = UDim2.new(0.5, -baseWidth * scaleX/2, 0.12, 0)
-        elseif viewportSize.Y < 700 then
-            scaleX = 0.8
-            scaleY = 0.8
-            MainFrame.Size = UDim2.new(0, baseWidth * scaleX, 0, baseHeight * scaleY)
-            MainFrame.Position = UDim2.new(0.5, -baseWidth * scaleX/2, 0.15, 0)
-        end
-    else
-        -- For desktop, make minor adjustments
-        if viewportSize.Y < 600 then
-            scaleX = 0.9
-            scaleY = 0.9
-            MainFrame.Size = UDim2.new(0, baseWidth * scaleX, 0, baseHeight * scaleY)
-            MainFrame.Position = UDim2.new(0.5, -baseWidth * scaleX/2, 0.5, -baseHeight * scaleY/2)
-        end
-    }
-
-    -- For very small screens, make it take up most of the width
-    if viewportSize.X < 350 then
-        MainFrame.Size = UDim2.new(0.9, 0, 0, baseHeight * scaleY)
-        MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset/2, isMobile and 0.1 or 0.5, isMobile and 0 or -baseHeight * scaleY/2)
-    }
-
-    -- Make sure content fits
-    local contentHeight = statusY + 30 * scaleY
-    if contentHeight > baseHeight * scaleY then
-        MainFrame.Size = UDim2.new(MainFrame.Size.X.Scale, MainFrame.Size.X.Offset, 0, contentHeight)
-    }
-end
-
-updateSizeBasedOnScreen()
 
 local function addButtonEffect(button)
     local originalColor = button.BackgroundColor3
