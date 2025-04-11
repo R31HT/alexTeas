@@ -127,13 +127,21 @@ DropdownButton.TextSize = isMobile and 16 or 16
 DropdownButton.Font = Enum.Font.GothamBold
 DropdownButton.Parent = MessageDropdown
 
--- Fixed dropdown position for mobile (positioned upward)
-local dropdownListHeight = isMobile and 110 or 110
+-- Make the entire dropdown frame clickable
+local DropdownClickArea = Instance.new("TextButton")
+DropdownClickArea.Name = "DropdownClickArea"
+DropdownClickArea.Size = UDim2.new(1, 0, 1, 0)
+DropdownClickArea.BackgroundTransparency = 1
+DropdownClickArea.Text = ""
+DropdownClickArea.ZIndex = 5
+DropdownClickArea.Parent = MessageDropdown
+
+-- Position the dropdown list below the dropdown button on desktop, and adjusted for mobile
+local dropdownListHeight = 110 * scaleY
 local DropdownList = Instance.new("ScrollingFrame")
 DropdownList.Name = "DropdownList"
 DropdownList.Size = UDim2.new(0, dropdownWidth, 0, dropdownListHeight)
--- Position dropdown above instead of below on mobile
-DropdownList.Position = UDim2.new(0, 0, isMobile and -dropdownListHeight - 5 or 1, 0)
+DropdownList.Position = UDim2.new(0, 0, 1, 2) -- Position just below the dropdown
 DropdownList.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 DropdownList.BorderColor3 = Color3.fromRGB(100, 100, 100)
 DropdownList.ScrollBarThickness = isMobile and 6 or 6
@@ -267,18 +275,36 @@ HideButton.MouseButton1Click:Connect(function()
     MiniButton.Visible = true
 end)
 
-DropdownButton.MouseButton1Click:Connect(function()
+-- Make both the dropdown button and the entire frame clickable to toggle the dropdown
+local function toggleDropdown()
     if isDropdownOpen then
         isDropdownOpen = false
         DropdownList.Visible = false
         DropdownButton.Text = "▼"
     else
+        -- Ensure dropdown doesn't overlap with other elements
+        -- Calculate space needed
+        local spaceBelow = (MainFrame.AbsoluteSize.Y - MessageDropdown.AbsolutePosition.Y - MessageDropdown.AbsoluteSize.Y) - 
+                          (FakeLabel.AbsolutePosition.Y - MainFrame.AbsolutePosition.Y)
+        
+        if isMobile or spaceBelow < dropdownListHeight then
+            -- Not enough space below, place it above
+            DropdownList.Position = UDim2.new(0, 0, 0, -dropdownListHeight - 2)
+        else
+            -- Enough space below, place it below
+            DropdownList.Position = UDim2.new(0, 0, 1, 2)
+        end
+        
         isDropdownOpen = true
         DropdownList.Visible = true
         DropdownButton.Text = "▲"
     end
-end)
+end
 
+DropdownButton.MouseButton1Click:Connect(toggleDropdown)
+DropdownClickArea.MouseButton1Click:Connect(toggleDropdown)
+
+-- Close dropdown when clicking outside
 UserInputService.InputBegan:Connect(function(input)
     if not isDropdownOpen then return end
 
@@ -303,19 +329,9 @@ UserInputService.InputBegan:Connect(function(input)
                          position.Y <= listAbsPosition.Y + listAbsSize.Y)
 
         if not insideDropdown and not insideList then
-            local mainAbsPos = MainFrame.AbsolutePosition
-            local mainAbsSize = MainFrame.AbsoluteSize
-
-            local insideMain = (position.X >= mainAbsPos.X and 
-                             position.X <= mainAbsPos.X + mainAbsSize.X and
-                             position.Y >= mainAbsPos.Y and 
-                             position.Y <= mainAbsPos.Y + mainAbsSize.Y)
-
-            if insideMain then
-                isDropdownOpen = false
-                DropdownList.Visible = false
-                DropdownButton.Text = "▼"
-            end
+            isDropdownOpen = false
+            DropdownList.Visible = false
+            DropdownButton.Text = "▼"
         end
     end
 end)
