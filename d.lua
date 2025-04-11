@@ -15,7 +15,7 @@ ScreenGui.Parent = localPlayer:WaitForChild("PlayerGui")
 local scaleX = isMobile and 0.8 or 1
 local scaleY = isMobile and 0.8 or 1
 local baseWidth = 300 * scaleX
-local baseHeight = 360 * scaleY
+local baseHeight = isMobile and 380 * scaleY or 360 * scaleY  -- Increased height for mobile to fit status
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
@@ -217,7 +217,8 @@ PresetContainer.Position = UDim2.new(0, 15 * scaleX, 0, presetY)
 PresetContainer.BackgroundTransparency = 1
 PresetContainer.Parent = MainFrame
 
-local statusY = baseHeight - 30 * scaleY
+-- Adjusted statusY to be visible on mobile
+local statusY = baseHeight - (isMobile and 35 or 30) * scaleY
 
 local StatusDot = Instance.new("Frame")
 StatusDot.Name = "StatusDot"
@@ -259,39 +260,57 @@ local MiniCorner = Instance.new("UICorner")
 MiniCorner.CornerRadius = UDim.new(0.2, 0)
 MiniCorner.Parent = MiniButton
 
+-- Main logic variables
 local messageHistory = {}
 local selectedMessageId = nil
 local selectedMessageIndex = nil
 local isDropdownOpen = false
 local processedMessages = {}
 
-MiniButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = true
-    MiniButton.Visible = false
-end)
+-- Button handlers
+local function addButtonEffect(button)
+    local originalColor = button.BackgroundColor3
+    local originalSize = button.Size
+    
+    button.MouseButton1Down:Connect(function()
+        button:TweenSize(
+            UDim2.new(originalSize.X.Scale, originalSize.X.Offset * 0.95, 
+                      originalSize.Y.Scale, originalSize.Y.Offset * 0.95),
+            Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
+        
+        button.BackgroundColor3 = Color3.fromRGB(
+            math.max(originalColor.R * 255 - 20, 0),
+            math.max(originalColor.G * 255 - 20, 0),
+            math.max(originalColor.B * 255 - 20, 0))
+    end)
+    
+    button.MouseButton1Up:Connect(function()
+        button:TweenSize(originalSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
+        button.BackgroundColor3 = originalColor
+    end)
+end
 
-HideButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = false
-    MiniButton.Visible = true
-end)
+-- Add button effects
+addButtonEffect(ApplyButton)
+addButtonEffect(DropdownButton)
+addButtonEffect(HideButton)
+addButtonEffect(MiniButton)
 
--- Make both the dropdown button and the entire frame clickable to toggle the dropdown
+-- Dropdown functionality
 local function toggleDropdown()
     if isDropdownOpen then
         isDropdownOpen = false
         DropdownList.Visible = false
         DropdownButton.Text = "▼"
     else
-        -- Ensure dropdown doesn't overlap with other elements
         -- Calculate space needed
         local spaceBelow = (MainFrame.AbsoluteSize.Y - MessageDropdown.AbsolutePosition.Y - MessageDropdown.AbsoluteSize.Y) - 
                           (FakeLabel.AbsolutePosition.Y - MainFrame.AbsolutePosition.Y)
         
+        -- Position dropdown based on available space
         if isMobile or spaceBelow < dropdownListHeight then
-            -- Not enough space below, place it above
             DropdownList.Position = UDim2.new(0, 0, 0, -dropdownListHeight - 2)
         else
-            -- Enough space below, place it below
             DropdownList.Position = UDim2.new(0, 0, 1, 2)
         end
         
@@ -304,70 +323,7 @@ end
 DropdownButton.MouseButton1Click:Connect(toggleDropdown)
 DropdownClickArea.MouseButton1Click:Connect(toggleDropdown)
 
--- Close dropdown when clicking outside
-UserInputService.InputBegan:Connect(function(input)
-    if not isDropdownOpen then return end
-
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or 
-       input.UserInputType == Enum.UserInputType.Touch then
-
-        local position = UserInputService:GetMouseLocation()
-
-        local dropdownAbsPosition = MessageDropdown.AbsolutePosition
-        local dropdownAbsSize = MessageDropdown.AbsoluteSize
-        local listAbsPosition = DropdownList.AbsolutePosition
-        local listAbsSize = DropdownList.AbsoluteSize
-
-        local insideDropdown = (position.X >= dropdownAbsPosition.X and 
-                             position.X <= dropdownAbsPosition.X + dropdownAbsSize.X and
-                             position.Y >= dropdownAbsPosition.Y and 
-                             position.Y <= dropdownAbsPosition.Y + dropdownAbsSize.Y)
-
-        local insideList = (position.X >= listAbsPosition.X and 
-                         position.X <= listAbsPosition.X + listAbsSize.X and
-                         position.Y >= listAbsPosition.Y and 
-                         position.Y <= listAbsPosition.Y + listAbsSize.Y)
-
-        if not insideDropdown and not insideList then
-            isDropdownOpen = false
-            DropdownList.Visible = false
-            DropdownButton.Text = "▼"
-        end
-    end
-end)
-
-TextChatService.OnIncomingMessage = function(message)
-    if message.TextSource and message.TextSource.UserId == localPlayer.UserId then
-        if processedMessages[message.MessageId] then
-            return
-        end
-
-        processedMessages[message.MessageId] = true
-
-        table.insert(messageHistory, 1, {
-            id = message.MessageId,
-            text = message.Text,
-            timestamp = os.time()
-        })
-
-        if #messageHistory > 10 then
-            table.remove(messageHistory, 11)
-        end
-
-        updateDropdownList()
-    end
-end
-
-local function removeMessageFromHistory(messageId)
-    for i, msgData in ipairs(messageHistory) do
-        if msgData.id == messageId then
-            table.remove(messageHistory, i)
-            return true
-        end
-    end
-    return false
-end
-
+-- Update dropdown list with message history
 function updateDropdownList()
     for _, child in pairs(DropdownList:GetChildren()) do
         if child:IsA("TextButton") then
@@ -420,6 +376,7 @@ function updateDropdownList()
     DropdownList.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
 end
 
+-- Create preset message buttons
 local function createPresetButton(text, position)
     local buttonWidth = isMobile and 75 * scaleX or 80 * scaleX
     local spacing = isMobile and 7.5 * scaleX or 7.5 * scaleX
@@ -447,10 +404,46 @@ local function createPresetButton(text, position)
     return button
 end
 
+-- Create preset buttons
 createPresetButton("pick blue", 0)
 createPresetButton("free robux", 1)
 createPresetButton("i hacked", 2)
 
+-- Main functionality
+MiniButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    MiniButton.Visible = false
+end)
+
+HideButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    MiniButton.Visible = true
+end)
+
+-- Process incoming messages
+TextChatService.OnIncomingMessage = function(message)
+    if message.TextSource and message.TextSource.UserId == localPlayer.UserId then
+        if processedMessages[message.MessageId] then
+            return
+        end
+
+        processedMessages[message.MessageId] = true
+
+        table.insert(messageHistory, 1, {
+            id = message.MessageId,
+            text = message.Text,
+            timestamp = os.time()
+        })
+
+        if #messageHistory > 10 then
+            table.remove(messageHistory, 11)
+        end
+
+        updateDropdownList()
+    end
+end
+
+-- Apply button functionality
 ApplyButton.MouseButton1Click:Connect(function()
     if not selectedMessageId then
         StatusText.Text = "Select a message first!"
@@ -467,7 +460,7 @@ ApplyButton.MouseButton1Click:Connect(function()
     local success, error = pcall(function()
         replicatesignal(game.TextChatService.ClientToServerMessageReplicateSignalV2,
             fakeText,
-            "a",
+            "b",
             currentMessageId, 
             TextChatService.TextChannels.RBXGeneral[localPlayer.Name],  
             TextChatService.TextChannels.RBXGeneral
@@ -480,7 +473,6 @@ ApplyButton.MouseButton1Click:Connect(function()
 
         if currentIndex and messageHistory[currentIndex] then
             messageHistory[currentIndex].text = fakeText
-
             updateDropdownList()
         end
 
@@ -492,35 +484,3 @@ ApplyButton.MouseButton1Click:Connect(function()
         StatusText.Text = "Error! Try again."
     end
 end)
-
-local function addButtonEffect(button)
-    local originalColor = button.BackgroundColor3
-    local originalSize = button.Size
-
-    button.MouseButton1Down:Connect(function()
-        button:TweenSize(
-            UDim2.new(originalSize.X.Scale, originalSize.X.Offset * 0.95, 
-                      originalSize.Y.Scale, originalSize.Y.Offset * 0.95),
-            Enum.EasingDirection.Out,
-            Enum.EasingStyle.Quad,
-            0.1,
-            true
-        )
-
-        button.BackgroundColor3 = Color3.fromRGB(
-            math.max(originalColor.R * 255 - 20, 0),
-            math.max(originalColor.G * 255 - 20, 0),
-            math.max(originalColor.B * 255 - 20, 0)
-        )
-    end)
-
-    button.MouseButton1Up:Connect(function()
-        button:TweenSize(originalSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
-        button.BackgroundColor3 = originalColor
-    end)
-end
-
-addButtonEffect(ApplyButton)
-addButtonEffect(DropdownButton)
-addButtonEffect(HideButton)
-addButtonEffect(MiniButton)
