@@ -127,10 +127,10 @@ DropdownButton.TextSize = isMobile and 16 or 16
 DropdownButton.Font = Enum.Font.GothamBold
 DropdownButton.Parent = MessageDropdown
 
--- Make the entire dropdown frame clickable
+-- Make the dropdown background clickable
 local DropdownClickArea = Instance.new("TextButton")
 DropdownClickArea.Name = "DropdownClickArea"
-DropdownClickArea.Size = UDim2.new(1, 0, 1, 0)
+DropdownClickArea.Size = UDim2.new(1, -40 * scaleX, 1, 0) -- Leave room for dropdown button
 DropdownClickArea.BackgroundTransparency = 1
 DropdownClickArea.Text = ""
 DropdownClickArea.ZIndex = 5
@@ -160,22 +160,29 @@ UIListLayout.Parent = DropdownList
 
 local fakeInputY = 145 * scaleY
 
+local FakeContainer = Instance.new("Frame")
+FakeContainer.Name = "FakeContainer"
+FakeContainer.Size = UDim2.new(1, 0, 0, 95 * scaleY)
+FakeContainer.Position = UDim2.new(0, 0, 0, fakeInputY)
+FakeContainer.BackgroundTransparency = 1
+FakeContainer.Parent = MainFrame
+
 local FakeLabel = Instance.new("TextLabel")
 FakeLabel.Name = "FakeLabel"
 FakeLabel.Size = UDim2.new(0, 150 * scaleX, 0, 22 * scaleY)
-FakeLabel.Position = UDim2.new(0, 15 * scaleX, 0, fakeInputY)
+FakeLabel.Position = UDim2.new(0, 15 * scaleX, 0, 0)
 FakeLabel.BackgroundTransparency = 1
 FakeLabel.Text = "Fake Message:"
 FakeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 FakeLabel.TextSize = isMobile and 16 or 16
 FakeLabel.TextXAlignment = Enum.TextXAlignment.Left
 FakeLabel.Font = Enum.Font.GothamSemibold
-FakeLabel.Parent = MainFrame
+FakeLabel.Parent = FakeContainer
 
 local FakeInput = Instance.new("TextBox")
 FakeInput.Name = "FakeInput"
 FakeInput.Size = UDim2.new(0, 270 * scaleX, 0, 35 * scaleY)
-FakeInput.Position = UDim2.new(0, 15 * scaleX, 0, fakeInputY + 22 * scaleY)
+FakeInput.Position = UDim2.new(0, 15 * scaleX, 0, 22 * scaleY)
 FakeInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 FakeInput.BorderColor3 = Color3.fromRGB(100, 100, 100)
 FakeInput.Text = "dementia is goated"
@@ -184,7 +191,7 @@ FakeInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 FakeInput.TextSize = isMobile and 16 or 16
 FakeInput.ClearTextOnFocus = false
 FakeInput.Font = Enum.Font.Gotham
-FakeInput.Parent = MainFrame
+FakeInput.Parent = FakeContainer
 
 local InputCorner = Instance.new("UICorner")
 InputCorner.CornerRadius = UDim.new(0, 6)
@@ -264,6 +271,7 @@ local selectedMessageId = nil
 local selectedMessageIndex = nil
 local isDropdownOpen = false
 local processedMessages = {}
+local savedFakeText = "dementia is goated" -- Default text
 
 MiniButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = true
@@ -275,17 +283,23 @@ HideButton.MouseButton1Click:Connect(function()
     MiniButton.Visible = true
 end)
 
--- Make both the dropdown button and the entire frame clickable to toggle the dropdown
+-- Function to handle dropdown visibility and fake input container
 local function toggleDropdown()
     if isDropdownOpen then
         isDropdownOpen = false
         DropdownList.Visible = false
         DropdownButton.Text = "▼"
+        -- Show FakeContainer when dropdown is closed
+        FakeContainer.Visible = true
+        -- Restore saved fake text
+        FakeInput.Text = savedFakeText
     else
-        -- Ensure dropdown doesn't overlap with other elements
+        -- Save current fake text before hiding
+        savedFakeText = FakeInput.Text
+        
         -- Calculate space needed
         local spaceBelow = (MainFrame.AbsoluteSize.Y - MessageDropdown.AbsolutePosition.Y - MessageDropdown.AbsoluteSize.Y) - 
-                          (FakeLabel.AbsolutePosition.Y - MainFrame.AbsolutePosition.Y)
+                          (FakeContainer.AbsolutePosition.Y - MainFrame.AbsolutePosition.Y)
         
         if isMobile or spaceBelow < dropdownListHeight then
             -- Not enough space below, place it above
@@ -298,42 +312,53 @@ local function toggleDropdown()
         isDropdownOpen = true
         DropdownList.Visible = true
         DropdownButton.Text = "▲"
+        -- Hide FakeContainer when dropdown is open
+        FakeContainer.Visible = false
     end
 end
 
 DropdownButton.MouseButton1Click:Connect(toggleDropdown)
 DropdownClickArea.MouseButton1Click:Connect(toggleDropdown)
 
--- Close dropdown when clicking outside
-UserInputService.InputBegan:Connect(function(input)
+-- Setup click detection to close dropdown excluding scroll events
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if not isDropdownOpen then return end
 
     if input.UserInputType == Enum.UserInputType.MouseButton1 or 
        input.UserInputType == Enum.UserInputType.Touch then
-
+        
         local position = UserInputService:GetMouseLocation()
-
+        
         local dropdownAbsPosition = MessageDropdown.AbsolutePosition
         local dropdownAbsSize = MessageDropdown.AbsoluteSize
         local listAbsPosition = DropdownList.AbsolutePosition
         local listAbsSize = DropdownList.AbsoluteSize
-
+        
         local insideDropdown = (position.X >= dropdownAbsPosition.X and 
                              position.X <= dropdownAbsPosition.X + dropdownAbsSize.X and
                              position.Y >= dropdownAbsPosition.Y and 
                              position.Y <= dropdownAbsPosition.Y + dropdownAbsSize.Y)
-
+        
         local insideList = (position.X >= listAbsPosition.X and 
                          position.X <= listAbsPosition.X + listAbsSize.X and
                          position.Y >= listAbsPosition.Y and 
                          position.Y <= listAbsPosition.Y + listAbsSize.Y)
-
+        
         if not insideDropdown and not insideList then
-            isDropdownOpen = false
-            DropdownList.Visible = false
-            DropdownButton.Text = "▼"
+            toggleDropdown()
         end
     end
+end)
+
+-- Fix for dropdown scrolling issue - prevent dropdown click area from capturing scroll events
+DropdownList.MouseWheelForward:Connect(function()
+    -- Handle scroll event but don't close dropdown
+    return
+end)
+
+DropdownList.MouseWheelBackward:Connect(function()
+    -- Handle scroll event but don't close dropdown
+    return
 end)
 
 TextChatService.OnIncomingMessage = function(message)
@@ -406,9 +431,7 @@ function updateDropdownList()
             SelectedMessage.Text = msgData.text
             selectedMessageId = msgData.id
             selectedMessageIndex = i
-            isDropdownOpen = false
-            DropdownList.Visible = false
-            DropdownButton.Text = "▼"
+            toggleDropdown() -- This will close dropdown and show fake input
 
             StatusText.Text = "Ready to bamboozle! Click Apply"
             StatusDot.BackgroundColor3 = Color3.fromRGB(65, 180, 65)
@@ -442,6 +465,7 @@ local function createPresetButton(text, position)
 
     button.MouseButton1Click:Connect(function()
         FakeInput.Text = text
+        savedFakeText = text -- Make sure to update saved text when using presets
     end)
 
     return button
@@ -460,6 +484,9 @@ ApplyButton.MouseButton1Click:Connect(function()
 
     local fakeText = FakeInput.Text
     if fakeText == "" then fakeText = "subscribe to dementia" end
+    
+    -- Update saved text
+    savedFakeText = fakeText
 
     local currentMessageId = selectedMessageId
     local currentIndex = selectedMessageIndex
@@ -480,7 +507,6 @@ ApplyButton.MouseButton1Click:Connect(function()
 
         if currentIndex and messageHistory[currentIndex] then
             messageHistory[currentIndex].text = fakeText
-
             updateDropdownList()
         end
 
