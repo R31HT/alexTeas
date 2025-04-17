@@ -13,7 +13,7 @@ for _, tool in ipairs(game:GetDescendants()) do
 		end
 		if not owned then
 			replicatesignal(humanoid.ServerEquipTool, tool)
-			game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true)
+			-- game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true)
 		end
 	end
 end
