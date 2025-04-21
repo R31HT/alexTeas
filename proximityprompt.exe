@@ -1,0 +1,392 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local CONFIG = {
+    TITLE = "Proximity Fryer",
+    GUI_COLOR = Color3.fromRGB(25, 25, 25),
+    TEXT_COLOR = Color3.fromRGB(255, 255, 255),
+    ACCENT_COLOR = Color3.fromRGB(255, 0, 0),
+    TRANSPARENCY = 0.2,
+    ENABLED_BY_DEFAULT = false,
+    DETECTION_RADIUS = 20,
+    CHECK_INTERVAL = 0.1,
+    MOBILE_FRIENDLY = true,
+    EXECUTION_MULTIPLIER = 1
+}
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local playerGui = player:WaitForChild("PlayerGui")
+local activeFryer = CONFIG.ENABLED_BY_DEFAULT
+local promptsFired = 0
+local nearbyPrompts = {}
+local checkPromptConnection = nil
+local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ProximityFryerGui"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = playerGui
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+if isMobile and CONFIG.MOBILE_FRIENDLY then
+    mainFrame.Size = UDim2.new(0, 250, 0, 170)
+    mainFrame.Position = UDim2.new(0.5, -125, 0.85, -170)
+else
+    mainFrame.Size = UDim2.new(0, 200, 0, 140)
+    mainFrame.Position = UDim2.new(0.85, -100, 0.1, 0)
+end
+mainFrame.BackgroundColor3 = CONFIG.GUI_COLOR
+mainFrame.BackgroundTransparency = CONFIG.TRANSPARENCY
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 10)
+uiCorner.Parent = mainFrame
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Name = "TitleLabel"
+titleLabel.Size = UDim2.new(1, 0, 0, 30)
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
+titleLabel.BackgroundColor3 = CONFIG.ACCENT_COLOR
+titleLabel.BackgroundTransparency = 0.3
+titleLabel.BorderSizePixel = 0
+titleLabel.Text = CONFIG.TITLE
+titleLabel.TextColor3 = CONFIG.TEXT_COLOR
+titleLabel.TextSize = isMobile and 20 or 18
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.Parent = mainFrame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 10)
+titleCorner.Parent = titleLabel
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Name = "StatusLabel"
+statusLabel.Size = UDim2.new(1, 0, 0, 20)
+statusLabel.Position = UDim2.new(0, 0, 0, 35)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Status: Active"
+statusLabel.TextColor3 = CONFIG.TEXT_COLOR
+statusLabel.TextSize = isMobile and 16 or 14
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.Parent = mainFrame
+
+local counterLabel = Instance.new("TextLabel")
+counterLabel.Name = "CounterLabel"
+counterLabel.Size = UDim2.new(1, 0, 0, 20)
+counterLabel.Position = UDim2.new(0, 0, 0.35, 0)
+counterLabel.BackgroundTransparency = 1
+counterLabel.Text = "Prompts Fired: 0"
+counterLabel.TextColor3 = CONFIG.TEXT_COLOR
+counterLabel.TextSize = isMobile and 16 or 14
+counterLabel.Font = Enum.Font.Gotham
+counterLabel.Parent = mainFrame
+
+local nearbyLabel = Instance.new("TextLabel")
+nearbyLabel.Name = "NearbyLabel"
+nearbyLabel.Size = UDim2.new(1, 0, 0, 20)
+nearbyLabel.Position = UDim2.new(0, 0, 0.45, 0)
+nearbyLabel.BackgroundTransparency = 1
+nearbyLabel.Text = "Nearby Prompts: 0" 
+nearbyLabel.TextColor3 = CONFIG.TEXT_COLOR
+nearbyLabel.TextSize = isMobile and 16 or 14
+nearbyLabel.Font = Enum.Font.Gotham
+nearbyLabel.Parent = mainFrame
+
+local multiplierLabel = Instance.new("TextLabel")
+multiplierLabel.Name = "MultiplierLabel"
+multiplierLabel.Size = UDim2.new(0.5, 0, 0, 20)
+multiplierLabel.Position = UDim2.new(0, 0, 0.55, 0)
+multiplierLabel.BackgroundTransparency = 1
+multiplierLabel.Text = "Multiplier: 1x"
+multiplierLabel.TextColor3 = CONFIG.TEXT_COLOR
+multiplierLabel.TextSize = isMobile and 16 or 14
+multiplierLabel.Font = Enum.Font.Gotham
+multiplierLabel.Parent = mainFrame
+
+local multiplierValue = Instance.new("TextLabel")
+multiplierValue.Name = "MultiplierValue"
+multiplierValue.Size = UDim2.new(0.15, 0, 0, 20)
+multiplierValue.Position = UDim2.new(0.85, 0, 0.55, 0)
+multiplierValue.BackgroundTransparency = 1
+multiplierValue.Text = "1"
+multiplierValue.TextColor3 = CONFIG.ACCENT_COLOR
+multiplierValue.TextSize = isMobile and 16 or 14
+multiplierValue.Font = Enum.Font.GothamBold
+multiplierValue.Parent = mainFrame
+
+local multiplierSlider = Instance.new("Frame")
+multiplierSlider.Name = "MultiplierSlider"
+multiplierSlider.Size = UDim2.new(0.7, 0, 0, 6)
+multiplierSlider.Position = UDim2.new(0.15, 0, 0.65, 0)
+multiplierSlider.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+multiplierSlider.BorderSizePixel = 0
+multiplierSlider.Parent = mainFrame
+
+local sliderCorner = Instance.new("UICorner")
+sliderCorner.CornerRadius = UDim.new(0, 3)
+sliderCorner.Parent = multiplierSlider
+
+local sliderButton = Instance.new("TextButton")
+sliderButton.Name = "SliderButton"
+sliderButton.Size = UDim2.new(0, 16, 0, 16)
+sliderButton.Position = UDim2.new(0, -8, 0.5, -8)
+sliderButton.BackgroundColor3 = CONFIG.ACCENT_COLOR
+sliderButton.BorderSizePixel = 0
+sliderButton.Text = ""
+sliderButton.Parent = multiplierSlider
+
+local buttonCornerSlider = Instance.new("UICorner")
+buttonCornerSlider.CornerRadius = UDim.new(0, 8)
+buttonCornerSlider.Parent = sliderButton
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Name = "ToggleButton"
+if isMobile then
+    toggleButton.Size = UDim2.new(0.9, 0, 0, 40)
+    toggleButton.Position = UDim2.new(0.05, 0, 0.75, 0)
+else
+    toggleButton.Size = UDim2.new(0.8, 0, 0, 30) 
+    toggleButton.Position = UDim2.new(0.1, 0, 0.75, 0)
+end
+toggleButton.BackgroundColor3 = CONFIG.ACCENT_COLOR
+toggleButton.BorderSizePixel = 0
+toggleButton.Text = "DISABLE"
+toggleButton.TextColor3 = CONFIG.TEXT_COLOR
+toggleButton.TextSize = isMobile and 18 or 14
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.Parent = mainFrame
+
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 8)
+buttonCorner.Parent = toggleButton
+
+local function updateGuiState()
+    if activeFryer then
+        toggleButton.Text = "DISABLE"
+        toggleButton.BackgroundColor3 = CONFIG.ACCENT_COLOR
+        statusLabel.Text = "Status: Active"
+    else
+        toggleButton.Text = "ENABLE" 
+        toggleButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+        statusLabel.Text = "Status: Inactive"
+    end
+end
+
+toggleButton.MouseButton1Click:Connect(function()
+    activeFryer = not activeFryer
+    updateGuiState()
+end)
+
+local function updateCounter()
+    counterLabel.Text = "Prompts Fired: " .. promptsFired
+    nearbyLabel.Text = "Nearby Prompts: " .. #nearbyPrompts
+    multiplierLabel.Text = "Multiplier: " .. CONFIG.EXECUTION_MULTIPLIER .. "x"
+    multiplierValue.Text = CONFIG.EXECUTION_MULTIPLIER
+end
+
+local function findNearbyPrompts()
+    nearbyPrompts = {}
+    
+    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+        return {}
+    end
+    
+    local hrp = player.Character.HumanoidRootPart
+    local position = hrp.Position
+    
+    for _, instance in pairs(game:GetDescendants()) do
+        if instance:IsA("ProximityPrompt") then
+            local parent = instance.Parent
+            if parent and parent:IsA("BasePart") then
+                local distance = (position - parent.Position).Magnitude
+                if distance <= CONFIG.DETECTION_RADIUS then
+                    table.insert(nearbyPrompts, instance)
+                end
+            end
+        end
+    end
+    
+    return nearbyPrompts
+end
+
+local function fireNearbyPrompts()
+    local prompts = findNearbyPrompts()
+    nearbyPrompts = prompts
+    updateCounter()
+    
+    if activeFryer and #prompts > 0 then
+        for _, prompt in pairs(prompts) do
+            for i = 1, CONFIG.EXECUTION_MULTIPLIER do
+                replicatesignal(prompt.TriggeredActionReplicated, player)
+                promptsFired = promptsFired + 1
+            end
+        end
+        updateCounter()
+    end
+end
+
+local function setupCharacter(char)
+    character = char
+    humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+end
+
+player.CharacterAdded:Connect(setupCharacter)
+
+local function toggleGuiVisibility()
+    screenGui.Enabled = not screenGui.Enabled
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.RightControl then
+        toggleGuiVisibility()
+    end
+end)
+
+if isMobile then
+    local toggleGuiButton = Instance.new("TextButton")
+    toggleGuiButton.Size = UDim2.new(0, 40, 0, 40)
+    toggleGuiButton.Position = UDim2.new(0.02, 0, 0.5, 0)
+    toggleGuiButton.BackgroundColor3 = CONFIG.ACCENT_COLOR
+    toggleGuiButton.BackgroundTransparency = 0.3
+    toggleGuiButton.BorderSizePixel = 0
+    toggleGuiButton.Text = "≡"
+    toggleGuiButton.TextColor3 = CONFIG.TEXT_COLOR
+    toggleGuiButton.TextSize = 24
+    toggleGuiButton.Font = Enum.Font.GothamBold
+    toggleGuiButton.Parent = screenGui
+    
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 20)
+    buttonCorner.Parent = toggleGuiButton
+    
+    toggleGuiButton.MouseButton1Click:Connect(toggleGuiVisibility)
+end
+
+local function updateSliderPosition()
+    local percent = (CONFIG.EXECUTION_MULTIPLIER - 1) / 9  -- Range 1-10
+    sliderButton.Position = UDim2.new(percent, -8, 0.5, -8)
+    multiplierValue.Text = CONFIG.EXECUTION_MULTIPLIER
+    multiplierLabel.Text = "Multiplier: " .. CONFIG.EXECUTION_MULTIPLIER .. "x"
+end
+
+local isDragging = false
+
+sliderButton.MouseButton1Down:Connect(function()
+    isDragging = true
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+       input.UserInputType == Enum.UserInputType.Touch then
+        isDragging = false
+    end
+end)
+
+multiplierSlider.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or
+       input.UserInputType == Enum.UserInputType.Touch then
+        isDragging = true
+        
+        local function updateFromPosition()
+            if not isDragging then return end
+            
+            local mousePosition = UserInputService:GetMouseLocation()
+            local sliderPosition = multiplierSlider.AbsolutePosition
+            local sliderSize = multiplierSlider.AbsoluteSize
+            
+            local relativeX = math.clamp((mousePosition.X - sliderPosition.X) / sliderSize.X, 0, 1)
+            CONFIG.EXECUTION_MULTIPLIER = math.floor(relativeX * 9) + 1  -- Range 1-10
+            updateSliderPosition()
+        end
+        
+        updateFromPosition()
+    end
+end)
+
+multiplierSlider.InputChanged:Connect(function(input)
+    if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or
+                       input.UserInputType == Enum.UserInputType.Touch) then
+        local mousePosition = UserInputService:GetMouseLocation()
+        local sliderPosition = multiplierSlider.AbsolutePosition
+        local sliderSize = multiplierSlider.AbsoluteSize
+        
+        local relativeX = math.clamp((mousePosition.X - sliderPosition.X) / sliderSize.X, 0, 1)
+        CONFIG.EXECUTION_MULTIPLIER = math.floor(relativeX * 9) + 1  -- Range 1-10
+        updateSliderPosition()
+    end
+end)
+
+checkPromptConnection = RunService.Heartbeat:Connect(function()
+    if not getfenv().lastCheck or tick() - getfenv().lastCheck >= CONFIG.CHECK_INTERVAL then
+        getfenv().lastCheck = tick()
+        fireNearbyPrompts()
+    end
+end)
+
+local function cleanup()
+    if checkPromptConnection then
+        checkPromptConnection:Disconnect()
+        checkPromptConnection = nil
+    end
+end
+
+screenGui.AncestryChanged:Connect(function(_, parent)
+    if parent == nil then
+        cleanup()
+    end
+end)
+
+updateGuiState()
+findNearbyPrompts()
+updateCounter()
+updateSliderPosition()
+
+local notifGui = Instance.new("ScreenGui")
+notifGui.Name = "ProximityFryerNotification"
+notifGui.Parent = playerGui
+
+local notifFrame = Instance.new("Frame")
+notifFrame.Name = "NotificationFrame"
+notifFrame.Size = UDim2.new(0, 250, 0, 60)
+notifFrame.Position = UDim2.new(0.5, -125, 0.85, 0)
+notifFrame.BackgroundColor3 = CONFIG.GUI_COLOR
+notifFrame.BackgroundTransparency = 0.1
+notifFrame.BorderSizePixel = 0
+notifFrame.Parent = notifGui
+
+local notifCorner = Instance.new("UICorner")
+notifCorner.CornerRadius = UDim.new(0, 10)
+notifCorner.Parent = notifFrame
+
+local notifLabel = Instance.new("TextLabel")
+notifLabel.Name = "NotificationLabel"
+notifLabel.Size = UDim2.new(1, 0, 1, 0)
+notifLabel.BackgroundTransparency = 1
+if isMobile then
+    notifLabel.Text = "Proximity Fryer Loaded!\nUse the ≡ button to close GUI"
+else
+    notifLabel.Text = "Proximity Fryer Loaded!\nPress Right Ctrl to close GUI"
+end
+notifLabel.TextColor3 = CONFIG.TEXT_COLOR
+notifLabel.TextSize = 14
+notifLabel.Font = Enum.Font.Gotham
+notifLabel.Parent = notifFrame
+
+spawn(function()
+    wait(3)
+    for i = 0, 1, 0.1 do
+        notifFrame.BackgroundTransparency = 0.1 + i
+        notifLabel.TextTransparency = i
+        wait(0.1)
+    end
+    notifGui:Destroy()
+end)
