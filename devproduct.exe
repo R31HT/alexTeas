@@ -1,0 +1,574 @@
+-- credits to hookfunction on v3rm this is a remake of his gui
+local mode = "fire"
+
+local Converted = {
+	["_ScreenGui"] = Instance.new("ScreenGui"),
+	["_MainFrame"] = Instance.new("Frame"),
+	["_UICorner"] = Instance.new("UICorner"),
+	["_UIStroke"] = Instance.new("UIStroke"),
+	["_TopBar"] = Instance.new("Frame"),
+	["_UICorner_TopBar"] = Instance.new("UICorner"),
+	["_DragButton"] = Instance.new("TextButton"),
+	["_CloseButton"] = Instance.new("TextButton"),
+	["_Title"] = Instance.new("TextLabel"),
+	["_TabsFrame"] = Instance.new("Frame"),
+	["_DevProductsTab"] = Instance.new("TextButton"),
+	["_GamePassesTab"] = Instance.new("TextButton"),
+	["_UICorner_Tabs"] = Instance.new("UICorner"),
+	["_ContentFrame"] = Instance.new("Frame"),
+	["_DevProductsFrame"] = Instance.new("ScrollingFrame"),
+	["_UIListLayout_DevProducts"] = Instance.new("UIListLayout"),
+	["_GamePassesFrame"] = Instance.new("ScrollingFrame"),
+	["_UIListLayout_GamePasses"] = Instance.new("UIListLayout"),
+	["_SettingsButton"] = Instance.new("TextButton"),
+	["_SettingsFrame"] = Instance.new("Frame"),
+	["_UICorner_Settings"] = Instance.new("UICorner"),
+	["_UIStroke_Settings"] = Instance.new("UIStroke"),
+	["_ModeSwitchLabel"] = Instance.new("TextLabel"),
+	["_ModeSwitch"] = Instance.new("TextButton"),
+	["_CloseSettingsButton"] = Instance.new("TextButton"),
+	["_ModeLabel"] = Instance.new("TextLabel"),
+	["_ExampleDevProduct"] = Instance.new("Frame"),
+	["_ExampleGamePass"] = Instance.new("Frame"),
+}
+
+local function applyDefaultStyles(element, styles)
+	for prop, value in pairs(styles) do
+		element[prop] = value
+	end
+end
+
+Converted["_ScreenGui"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+Converted["_ScreenGui"].ResetOnSpawn = false
+Converted["_ScreenGui"].DisplayOrder = 999
+Converted["_ScreenGui"].IgnoreGuiInset = true
+
+local success, result = pcall(function()
+	return game:GetService("CoreGui")
+end)
+
+if success then
+	Converted["_ScreenGui"].Parent = result
+else
+	Converted["_ScreenGui"].Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+end
+
+applyDefaultStyles(Converted["_MainFrame"], {
+	BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+	BorderSizePixel = 0,
+	Position = UDim2.new(0.5, -125, 0.5, -200),
+	Size = UDim2.new(0, 250, 0, 400),
+	ClipsDescendants = true,
+})
+Converted["_MainFrame"].Parent = Converted["_ScreenGui"]
+
+Converted["_UICorner"].CornerRadius = UDim.new(0, 8)
+Converted["_UICorner"].Parent = Converted["_MainFrame"]
+
+Converted["_UIStroke"].Color = Color3.fromRGB(100, 100, 100)
+Converted["_UIStroke"].Thickness = 1
+Converted["_UIStroke"].Parent = Converted["_MainFrame"]
+
+applyDefaultStyles(Converted["_TopBar"], {
+	BackgroundColor3 = Color3.fromRGB(50, 50, 50),
+	BorderSizePixel = 0,
+	Size = UDim2.new(1, 0, 0, 30),
+})
+Converted["_TopBar"].Parent = Converted["_MainFrame"]
+
+Converted["_UICorner_TopBar"].CornerRadius = UDim.new(0, 8)
+Converted["_UICorner_TopBar"].Parent = Converted["_TopBar"]
+
+applyDefaultStyles(Converted["_DragButton"], {
+	Text = "≡",
+	Font = Enum.Font.GothamBold,
+	TextColor3 = Color3.fromRGB(255, 255, 255),
+	TextSize = 18,
+	BackgroundTransparency = 1,
+	Size = UDim2.new(0, 30, 1, 0),
+})
+Converted["_DragButton"].Parent = Converted["_TopBar"]
+
+applyDefaultStyles(Converted["_CloseButton"], {
+	Text = "×",
+	Font = Enum.Font.GothamBold,
+	TextColor3 = Color3.fromRGB(255, 100, 100),
+	TextSize = 20,
+	BackgroundTransparency = 1,
+	Position = UDim2.new(1, -30, 0, 0),
+	Size = UDim2.new(0, 30, 1, 0),
+})
+Converted["_CloseButton"].Parent = Converted["_TopBar"]
+
+applyDefaultStyles(Converted["_Title"], {
+	Text = "Products & Passes",
+	Font = Enum.Font.GothamBold,
+	TextColor3 = Color3.fromRGB(255, 255, 255),
+	TextSize = 14,
+	BackgroundTransparency = 1,
+	Position = UDim2.new(0, 30, 0, 0),
+	Size = UDim2.new(1, -90, 1, 0),
+})
+Converted["_Title"].Parent = Converted["_TopBar"]
+
+applyDefaultStyles(Converted["_SettingsButton"], {
+	Text = "⚙",
+	Font = Enum.Font.GothamBold,
+	TextColor3 = Color3.fromRGB(255, 255, 255),
+	TextSize = 16,
+	BackgroundTransparency = 1,
+	Position = UDim2.new(1, -60, 0, 0),
+	Size = UDim2.new(0, 30, 1, 0),
+})
+Converted["_SettingsButton"].Parent = Converted["_TopBar"]
+
+applyDefaultStyles(Converted["_TabsFrame"], {
+	BackgroundColor3 = Color3.fromRGB(55, 55, 55),
+	BorderSizePixel = 0,
+	Position = UDim2.new(0, 0, 0, 30),
+	Size = UDim2.new(1, 0, 0, 30),
+})
+Converted["_TabsFrame"].Parent = Converted["_MainFrame"]
+
+applyDefaultStyles(Converted["_DevProductsTab"], {
+	Text = "Dev Products",
+	Font = Enum.Font.Gotham,
+	TextColor3 = Color3.fromRGB(255, 255, 255),
+	TextSize = 14,
+	BackgroundColor3 = Color3.fromRGB(60, 60, 60),
+	BorderSizePixel = 0,
+	Size = UDim2.new(0.5, 0, 1, 0),
+})
+Converted["_DevProductsTab"].Parent = Converted["_TabsFrame"]
+
+applyDefaultStyles(Converted["_GamePassesTab"], {
+	Text = "Game Passes",
+	Font = Enum.Font.Gotham,
+	TextColor3 = Color3.fromRGB(200, 200, 200),
+	TextSize = 14,
+	BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+	BorderSizePixel = 0,
+	Position = UDim2.new(0.5, 0, 0, 0),
+	Size = UDim2.new(0.5, 0, 1, 0),
+})
+Converted["_GamePassesTab"].Parent = Converted["_TabsFrame"]
+
+applyDefaultStyles(Converted["_ContentFrame"], {
+	BackgroundTransparency = 1,
+	Position = UDim2.new(0, 0, 0, 60),
+	Size = UDim2.new(1, 0, 1, -60),
+})
+Converted["_ContentFrame"].Parent = Converted["_MainFrame"]
+
+applyDefaultStyles(Converted["_DevProductsFrame"], {
+	BackgroundTransparency = 1,
+	Size = UDim2.new(1, 0, 1, 0),
+	ScrollBarThickness = 4,
+	ScrollingDirection = Enum.ScrollingDirection.Y,
+	AutomaticCanvasSize = Enum.AutomaticSize.Y,
+	CanvasSize = UDim2.new(0, 0, 0, 0),
+	Visible = true,
+})
+Converted["_DevProductsFrame"].Parent = Converted["_ContentFrame"]
+
+Converted["_UIListLayout_DevProducts"].SortOrder = Enum.SortOrder.LayoutOrder
+Converted["_UIListLayout_DevProducts"].Padding = UDim.new(0, 2)
+Converted["_UIListLayout_DevProducts"].Parent = Converted["_DevProductsFrame"]
+
+applyDefaultStyles(Converted["_GamePassesFrame"], {
+	BackgroundTransparency = 1,
+	Size = UDim2.new(1, 0, 1, 0),
+	ScrollBarThickness = 4,
+	ScrollingDirection = Enum.ScrollingDirection.Y,
+	AutomaticCanvasSize = Enum.AutomaticSize.Y,
+	CanvasSize = UDim2.new(0, 0, 0, 0),
+	Visible = false,
+})
+Converted["_GamePassesFrame"].Parent = Converted["_ContentFrame"]
+
+Converted["_UIListLayout_GamePasses"].SortOrder = Enum.SortOrder.LayoutOrder
+Converted["_UIListLayout_GamePasses"].Padding = UDim.new(0, 2)
+Converted["_UIListLayout_GamePasses"].Parent = Converted["_GamePassesFrame"]
+
+applyDefaultStyles(Converted["_SettingsFrame"], {
+	BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+	BorderSizePixel = 0,
+	Position = UDim2.new(0.5, -100, 0.5, -75),
+	Size = UDim2.new(0, 200, 0, 150),
+	Visible = false,
+	ZIndex = 10,
+})
+Converted["_SettingsFrame"].Parent = Converted["_MainFrame"]
+
+Converted["_UICorner_Settings"].CornerRadius = UDim.new(0, 8)
+Converted["_UICorner_Settings"].Parent = Converted["_SettingsFrame"]
+
+Converted["_UIStroke_Settings"].Color = Color3.fromRGB(100, 100, 100)
+Converted["_UIStroke_Settings"].Thickness = 1
+Converted["_UIStroke_Settings"].Parent = Converted["_SettingsFrame"]
+
+applyDefaultStyles(Converted["_ModeSwitchLabel"], {
+	Text = "Mode:",
+	Font = Enum.Font.Gotham,
+	TextColor3 = Color3.fromRGB(255, 255, 255),
+	TextSize = 14,
+	BackgroundTransparency = 1,
+	Position = UDim2.new(0, 10, 0, 40),
+	Size = UDim2.new(0, 50, 0, 30),
+	ZIndex = 11,
+})
+Converted["_ModeSwitchLabel"].Parent = Converted["_SettingsFrame"]
+
+applyDefaultStyles(Converted["_ModeLabel"], {
+	Text = "Purchase Mode",
+	Font = Enum.Font.Gotham,
+	TextColor3 = Color3.fromRGB(255, 255, 255),
+	TextSize = 14,
+	BackgroundTransparency = 1,
+	Position = UDim2.new(0, 70, 0, 40),
+	Size = UDim2.new(0, 120, 0, 30),
+	TextXAlignment = Enum.TextXAlignment.Left,
+	ZIndex = 11,
+})
+Converted["_ModeLabel"].Parent = Converted["_SettingsFrame"]
+
+applyDefaultStyles(Converted["_ModeSwitch"], {
+	Text = "Switch Mode",
+	Font = Enum.Font.Gotham,
+	TextColor3 = Color3.fromRGB(255, 255, 255),
+	TextSize = 14,
+	BackgroundColor3 = Color3.fromRGB(60, 60, 60),
+	BorderSizePixel = 0,
+	Position = UDim2.new(0.5, -75, 0, 80),
+	Size = UDim2.new(0, 150, 0, 30),
+	ZIndex = 11,
+})
+Converted["_ModeSwitch"].Parent = Converted["_SettingsFrame"]
+
+applyDefaultStyles(Converted["_CloseSettingsButton"], {
+	Text = "×",
+	Font = Enum.Font.GothamBold,
+	TextColor3 = Color3.fromRGB(255, 100, 100),
+	TextSize = 20,
+	BackgroundTransparency = 1,
+	Position = UDim2.new(1, -30, 0, 0),
+	Size = UDim2.new(0, 30, 0, 30),
+	ZIndex = 11,
+})
+Converted["_CloseSettingsButton"].Parent = Converted["_SettingsFrame"]
+
+applyDefaultStyles(Converted["_ExampleDevProduct"], {
+	BackgroundColor3 = Color3.fromRGB(50, 50, 50),
+	BorderSizePixel = 0,
+	Size = UDim2.new(1, -10, 0, 80),
+	Position = UDim2.new(0, 5, 0, 0),
+	Name = "ExampleDevProduct",
+	Visible = false,
+})
+Converted["_ExampleDevProduct"].Parent = Converted["_DevProductsFrame"]
+
+applyDefaultStyles(Converted["_ExampleGamePass"], {
+	BackgroundColor3 = Color3.fromRGB(50, 50, 50),
+	BorderSizePixel = 0,
+	Size = UDim2.new(1, -10, 0, 80),
+	Position = UDim2.new(0, 5, 0, 0),
+	Name = "ExampleGamePass",
+	Visible = false,
+})
+Converted["_ExampleGamePass"].Parent = Converted["_GamePassesFrame"]
+
+local function createProductTemplate(parent, type)
+	local template = Instance.new("Frame")
+	template.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	template.BorderSizePixel = 0
+	template.Size = UDim2.new(1, -10, 0, 80)
+	template.Position = UDim2.new(0, 5, 0, 0)
+	template.Name = type.."Template"
+	template.Visible = false
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 6)
+	corner.Parent = template
+	
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Name = "NameLabel"
+	nameLabel.Text = "Name: "
+	nameLabel.Font = Enum.Font.Gotham
+	nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	nameLabel.TextSize = 14
+	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Position = UDim2.new(0, 10, 0, 5)
+	nameLabel.Size = UDim2.new(1, -20, 0, 20)
+	nameLabel.Parent = template
+	
+	local idLabel = Instance.new("TextLabel")
+	idLabel.Name = "IDLabel"
+	idLabel.Text = "ID: "
+	idLabel.Font = Enum.Font.Gotham
+	idLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	idLabel.TextSize = 14
+	idLabel.TextXAlignment = Enum.TextXAlignment.Left
+	idLabel.BackgroundTransparency = 1
+	idLabel.Position = UDim2.new(0, 10, 0, 25)
+	idLabel.Size = UDim2.new(1, -20, 0, 20)
+	idLabel.Parent = template
+	
+	local priceLabel = Instance.new("TextLabel")
+	priceLabel.Name = "PriceLabel"
+	priceLabel.Text = "Price: "
+	priceLabel.Font = Enum.Font.Gotham
+	priceLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	priceLabel.TextSize = 14
+	priceLabel.TextXAlignment = Enum.TextXAlignment.Left
+	priceLabel.BackgroundTransparency = 1
+	priceLabel.Position = UDim2.new(0, 10, 0, 45)
+	priceLabel.Size = UDim2.new(1, -20, 0, 20)
+	priceLabel.Parent = template
+	
+	local clickButton = Instance.new("TextButton")
+	clickButton.Name = "ClickButton"
+	clickButton.Text = ""
+	clickButton.BackgroundTransparency = 0.9
+	clickButton.Size = UDim2.new(1, 0, 1, 0)
+	clickButton.Parent = template
+	
+	return template
+end
+
+local devProductTemplate = createProductTemplate(Converted["_DevProductsFrame"], "DevProduct")
+local gamePassTemplate = createProductTemplate(Converted["_GamePassesFrame"], "GamePass")
+
+local function createProductEntry(template, container, data, productType)
+	local newEntry = template:Clone()
+	newEntry.Parent = container
+	newEntry.Visible = true
+	
+	newEntry.NameLabel.Text = "Name: " .. (data.Name or "N/A")
+	newEntry.IDLabel.Text = "ID: " .. (data.Id or data.ProductId or "N/A")
+	
+	if productType == "DevProduct" then
+		newEntry.PriceLabel.Text = "Price: " .. (data.PriceInRobux or "N/A") .. " R$"
+	else
+		newEntry.PriceLabel.Text = "Price: " .. (data.Price or "N/A") .. " R$"
+	end
+	
+	newEntry.ClickButton.MouseButton1Click:Connect(function()
+		local id = data.Id or data.ProductId
+		if mode == "copy" then
+			if (setclipboard) then
+				setclipboard(tostring(id))
+				newEntry.ClickButton.Text = "Copied!"
+				wait(1)
+				newEntry.ClickButton.Text = ""
+			end
+		elseif mode == "fire" then
+			if productType == "DevProduct" then
+				game:GetService("MarketplaceService"):SignalPromptProductPurchaseFinished(
+					game.Players.LocalPlayer.UserId, 
+					id, 
+					true
+				)
+			else
+				game:GetService("MarketplaceService"):SignalPromptGamePassPurchaseFinished(
+					game.Players.LocalPlayer.UserId,
+					id,
+					true
+				)
+			end
+		end
+	end)
+	
+	return newEntry
+end
+
+local function loadDevProducts()
+	for _, child in pairs(Converted["_DevProductsFrame"]:GetChildren()) do
+		if child:IsA("Frame") and child.Name ~= "DevProductTemplate" and child.Name ~= "ExampleDevProduct" then
+			child:Destroy()
+		end
+	end
+	
+	local MarketplaceService = game:GetService("MarketplaceService")
+	local success, result = pcall(function()
+		return MarketplaceService:GetDeveloperProductsAsync():GetCurrentPage()
+	end)
+	
+	if success then
+		for _, product in pairs(result) do
+			createProductEntry(devProductTemplate, Converted["_DevProductsFrame"], product, "DevProduct")
+		end
+	else
+		local errorLabel = Instance.new("TextLabel")
+		errorLabel.Text = "Error loading developer products"
+		errorLabel.Font = Enum.Font.Gotham
+		errorLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+		errorLabel.TextSize = 14
+		errorLabel.BackgroundTransparency = 1
+		errorLabel.Size = UDim2.new(1, 0, 0, 30)
+		errorLabel.Parent = Converted["_DevProductsFrame"]
+	end
+end
+
+local function loadGamePasses()
+	for _, child in pairs(Converted["_GamePassesFrame"]:GetChildren()) do
+		if child:IsA("Frame") and child.Name ~= "GamePassTemplate" and child.Name ~= "ExampleGamePass" then
+			child:Destroy()
+		end
+	end
+	
+	local loadingLabel = Instance.new("TextLabel")
+	loadingLabel.Text = "Loading game passes..."
+	loadingLabel.Font = Enum.Font.Gotham
+	loadingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	loadingLabel.TextSize = 14
+	loadingLabel.BackgroundTransparency = 1
+	loadingLabel.Size = UDim2.new(1, 0, 0, 30)
+	loadingLabel.Parent = Converted["_GamePassesFrame"]
+	
+	local HttpService = game:GetService("HttpService")
+	local placeId = game.PlaceId
+	
+	local success, universeIdResult = pcall(function()
+		return HttpService:JSONDecode(game:HttpGet("https://apis.roproxy.com/universes/v1/places/" .. placeId .. "/universe"))
+	end)
+	
+	if success and universeIdResult and universeIdResult.universeId then
+		local universeId = universeIdResult.universeId
+		
+		local gamePassesSuccess, gamePassesResult = pcall(function()
+			return HttpService:JSONDecode(game:HttpGet("https://games.roproxy.com/v1/games/" .. universeId .. "/game-passes?limit=100&sortOrder=Asc"))
+		end)
+		
+		if gamePassesSuccess and gamePassesResult and gamePassesResult.data then
+			loadingLabel:Destroy()
+			
+			for _, gamePass in pairs(gamePassesResult.data) do
+				local passData = {
+					Name = gamePass.name,
+					Id = gamePass.id,
+					Price = gamePass.price,
+					Description = gamePass.description
+				}
+				createProductEntry(gamePassTemplate, Converted["_GamePassesFrame"], passData, "GamePass")
+			end
+		else
+			loadingLabel.Text = "Error: Failed to load game passes"
+			loadingLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+		end
+	else
+		loadingLabel.Text = "Error: Failed to get universe ID"
+		loadingLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+	end
+end
+
+local function updateModeLabel()
+	if mode == "fire" then
+		Converted["_ModeLabel"].Text = "Purchase Mode"
+	else
+		Converted["_ModeLabel"].Text = "Copy ID Mode"
+	end
+end
+
+Converted["_CloseButton"].MouseButton1Click:Connect(function()
+	Converted["_ScreenGui"]:Destroy()
+end)
+
+Converted["_DevProductsTab"].MouseButton1Click:Connect(function()
+	Converted["_DevProductsFrame"].Visible = true
+	Converted["_GamePassesFrame"].Visible = false
+	Converted["_DevProductsTab"].BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	Converted["_DevProductsTab"].TextColor3 = Color3.fromRGB(255, 255, 255)
+	Converted["_GamePassesTab"].BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	Converted["_GamePassesTab"].TextColor3 = Color3.fromRGB(200, 200, 200)
+end)
+
+Converted["_GamePassesTab"].MouseButton1Click:Connect(function()
+	Converted["_DevProductsFrame"].Visible = false
+	Converted["_GamePassesFrame"].Visible = true
+	Converted["_DevProductsTab"].BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	Converted["_DevProductsTab"].TextColor3 = Color3.fromRGB(200, 200, 200)
+	Converted["_GamePassesTab"].BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	Converted["_GamePassesTab"].TextColor3 = Color3.fromRGB(255, 255, 255)
+	
+	if #Converted["_GamePassesFrame"]:GetChildren() <= 3 then
+		loadGamePasses()
+	end
+end)
+
+Converted["_SettingsButton"].MouseButton1Click:Connect(function()
+	Converted["_SettingsFrame"].Visible = true
+end)
+
+Converted["_CloseSettingsButton"].MouseButton1Click:Connect(function()
+	Converted["_SettingsFrame"].Visible = false
+end)
+
+Converted["_ModeSwitch"].MouseButton1Click:Connect(function()
+	mode = mode == "fire" and "copy" or "fire"
+	updateModeLabel()
+end)
+
+local function makeDraggable(gui)
+	local UserInputService = game:GetService("UserInputService")
+	local dragging = false
+	local dragInput
+	local dragStart
+	local startPos
+	
+	local function updatePosition(input)
+		local delta = input.Position - dragStart
+		gui.Position = UDim2.new(
+			startPos.X.Scale, 
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+	
+	Converted["_DragButton"].InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = gui.Position
+			
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+	
+	Converted["_TopBar"].InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = gui.Position
+			
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+	
+	gui.InputChanged:Connect(function(input)
+		if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragging then
+			dragInput = input
+		end
+	end)
+	
+	UserInputService.InputChanged:Connect(function(input)
+		if input == dragInput and dragging then
+			updatePosition(input)
+		end
+	end)
+end
+
+makeDraggable(Converted["_MainFrame"])
+updateModeLabel()
+loadDevProducts()
+
+return Converted["_ScreenGui"]
