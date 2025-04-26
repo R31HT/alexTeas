@@ -1,0 +1,27 @@
+local storage = game:GetService("ReplicatedStorage")
+local p = game:GetService("Players").LocalPlayer
+local belilabel = p.PlayerGui.Main.Ability.Money.TextLabel
+local SpinsRE = storage:WaitForChild("Remote"):WaitForChild("Other"):WaitForChild("SpinsRE")
+
+local function getMoney()
+    local text = belilabel.Text
+    text = text:gsub("B%$", ""):gsub(",", "")
+    local value, suffix = text:match("([%d%.]+)(%a?)")
+    value = tonumber(value)
+    if suffix == "T" then
+        return value * 1e12
+    elseif suffix == "B" then
+        return value * 1e9
+    elseif suffix == "M" then
+        return value * 1e6
+    else
+        return value or 0
+    end
+end
+
+while task.wait(0.9) do
+    local money = getMoney()
+    if money >= 250e12 then
+        SpinsRE:FireServer("SPINB10000")
+    end
+end
